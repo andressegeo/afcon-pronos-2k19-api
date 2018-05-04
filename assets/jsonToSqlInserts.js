@@ -49,9 +49,10 @@ let stageMapping = {
 };
 
 let groupStages = Object.keys(data.groups).map((group, idx) => {
-    stageMapping['groups'][group] = idx;
+    let id = idx + 1;
+    stageMapping['groups'][group] = id;
     return {
-        id: idx,
+        id: id,
         name: `GROUPE ${group.toUpperCase()}`,
         opening_time: 1527804000, // 1st of June 00:00 Paris
         closing_time: 1528840800, // 13th of June 00:00 Paris
@@ -81,7 +82,7 @@ let knockoutStages = [
         json_key: 'round_2_loser'
     }
 ].map((entry, idx) => {
-    let id = groupStages.length + idx;
+    let id = groupStages.length + idx + 1;
     stageMapping['knockout'][entry.json_key] = id;
     return {
         id: id,
