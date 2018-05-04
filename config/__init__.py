@@ -1,0 +1,1 @@
+from .config_dev import CONFIG
