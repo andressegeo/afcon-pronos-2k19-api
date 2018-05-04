@@ -6,7 +6,7 @@ threadsafe: true
 handlers:
 - url: /.*
   script: main.APP
-  login: reuired
+  login: required
   secure: always
 
 libraries:
