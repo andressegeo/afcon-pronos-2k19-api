@@ -1,0 +1,33 @@
+service: api
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /.*
+  script: main.APP
+  login: reuired
+  secure: always
+
+libraries:
+- name: MySQLdb
+  version: "latest"
+- name: ssl
+  version: latest
+
+skip_files:
+  - ^(.*/)?#.*#$
+  - ^(.*/)?.*~$
+  - ^(.*/)?.*\.py[co]$
+  - ^(.*/)?.*\.ts$
+  - ^(.*/)?.*\.js.map$
+  - ^(.*/)?.*/RCS/.*$
+  - ^(.*/)?\..*$
+  - ^node_modules$
+  - ^venv$
+  - ^log\.txt$
+  - ^\.idea$
+  - ^\.git$
+  - ^\.vscode$
+  - ^configs$
+  - venv

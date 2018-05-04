@@ -13,7 +13,7 @@ init_logger(logging_config[u'pattern'], logging_config[u'pattern_debug'], loggin
 
 
 # create flask server
-
+APP = Flask(__name__)
 APP.debug = CONFIG[u"app"][u"debug"]
 
 
