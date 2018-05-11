@@ -29,4 +29,8 @@ skip_files:
   - ^\.idea$
   - ^\.git$
   - ^\.vscode$
+<<<<<<< HEAD
   - ^configs$
+=======
+  - ^configs$
+>>>>>>> 769cef15bb93eaac1092e99b517dac78626cdbe5
