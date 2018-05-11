@@ -19,7 +19,63 @@ def connect():
     cursor = con.cursor()
     return cursor, con
 
+"""
+All the matches blueprint methods [3]
+"""
 
+def get_all_matches():
+    pass
+
+
+
+def predict_one_match():
+    pass
+
+
+def scoring_one_match():
+    pass
+
+
+"""
+All the ranking blueprint methods [1]
+"""
+def get_ranking():
+    pass
+
+
+"""
+All the stadiums blueprint methods [1]
+"""
+def get_all_stadiums():
+    pass
+
+
+"""
+All the teams blueprint methods [1]
+"""
+def get_all_teams():
+    pass
+
+"""
+All the users blueprint methods [2]
+"""
+def get_all_users():
+    pass
+
+def get_me_as_user():
+    pass
+
+"""
+All the winner_prediction blueprint methods [3]
+"""
+def get_prediction_winner():
+    pass
+
+def get_one_prediction():
+    pass
+
+def add_winner():
+    pass
 
 if __name__ == '__main__':
     pass
