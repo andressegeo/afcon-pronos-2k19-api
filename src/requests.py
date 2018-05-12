@@ -9,7 +9,6 @@ import logging
 
 def connect():
     con = MySQLdb.connect(
-        unix_socket=CONFIG[u"db"][u"unix_socket"],
         host=CONFIG[u"db"][u"host"],
         user=CONFIG[u"db"][u"user"],
         passwd=CONFIG[u"db"][u"password"],
@@ -23,58 +22,79 @@ def connect():
 All the matches blueprint methods [3]
 """
 
-def get_all_matches():
+def getAllMatches():
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM matches")
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id' : row[0],
+                u'stages_id' : row[1],
+                u'match_time' : row[2],
+                u'team_1' : row[3],
+                u'team_2' : row[4],
+                u'placeholder_1' : row[5],
+                u'placeholder_2' : row[6],
+                u'stadiums_id' : row[7],
+                u'score' : row[8],
+                u'winner' : row[9]
+            })
+        con.commit()
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+    return items
+
+
+
+def predictMatch():
     pass
 
 
-
-def predict_one_match():
-    pass
-
-
-def scoring_one_match():
+def scoringMatch():
     pass
 
 
 """
 All the ranking blueprint methods [1]
 """
-def get_ranking():
+def Ranking():
     pass
 
 
 """
 All the stadiums blueprint methods [1]
 """
-def get_all_stadiums():
+def getAllStadiums():
     pass
 
 
 """
 All the teams blueprint methods [1]
 """
-def get_all_teams():
+def getAllTeams():
     pass
 
 """
 All the users blueprint methods [2]
 """
-def get_all_users():
+def getAllUsers():
     pass
 
-def get_me_as_user():
+def getMeAsUser():
     pass
 
 """
 All the winner_prediction blueprint methods [3]
 """
-def get_prediction_winner():
+def getPredictionWinner():
     pass
 
-def get_one_prediction():
+def getOnePrediction():
     pass
 
-def add_winner():
+def addWinner():
     pass
 
 if __name__ == '__main__':

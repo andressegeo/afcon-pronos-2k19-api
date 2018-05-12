@@ -16,11 +16,11 @@ init_logger(logging_config[u'pattern'], logging_config[u'pattern_debug'], loggin
 APP = Flask(__name__)
 APP.debug = CONFIG[u"app"][u"debug"]
 APP.register_blueprint(USERS_API_BLUEPRINT, url_prefix = u'/users')
-APP.register_blueprint(USERS_API_BLUEPRINT, url_prefix = u'/teams')
-APP.register_blueprint(USERS_API_BLUEPRINT, url_prefix = u'/matches')
-APP.register_blueprint(USERS_API_BLUEPRINT, url_prefix = u'/winner_prediction')
-APP.register_blueprint(USERS_API_BLUEPRINT, url_prefix = u'/ranking')
-APP.register_blueprint(USERS_API_BLUEPRINT, url_prefix = u'/stadiums')
+APP.register_blueprint(TEAMS_API_BLUEPRINT, url_prefix = u'/teams')
+APP.register_blueprint(MATCHES_API_BLUEPRINT, url_prefix = u'/matches')
+APP.register_blueprint(WINNER_PREDICTION_API_BLUEPRINT, url_prefix = u'/winner_prediction')
+APP.register_blueprint(RANKING_API_BLUEPRINT, url_prefix = u'/ranking')
+APP.register_blueprint(STADIUMS_API_BLUEPRINT, url_prefix = u'/stadiums')
 
 
 if __name__ == u"__main__":

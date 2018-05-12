@@ -12,6 +12,7 @@ As her name indicates, this method allow to retrieve the games open to predictio
 @MATCHES_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_all_matches():
     items = req.getAllMatches()
+    print items
     return flask_construct_response({u'items':items})
 
 
