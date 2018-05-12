@@ -67,7 +67,24 @@ def Ranking():
 All the stadiums blueprint methods [1]
 """
 def getAllStadiums():
-    pass
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM stadiums")
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id' : row[0],
+                u'lat' : row[1],
+                u'lng' : row[2],
+                u'name' : row[3],
+                u'city' : row[4]
+            })
+        con.commit()
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+    return items
+
 
 
 """
