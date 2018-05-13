@@ -29,8 +29,7 @@ stadiumStatements.push(...data.stadiums.map(stadium => {
 /* teams */
 
 function makeTeamFlagUrl(teamIso2) {
-    // TODO: change
-    return `https://storage.blabla.google.com/file/${teamIso2}.svg`;
+    return `https://storage.cloud.google.com/dgc-worldcup-russia-2018.appspot.com/flags/${teamIso2}.svg?organizationId=48621725833`;
 }
 
 teamStatements.push(...data.teams.map(team => {
