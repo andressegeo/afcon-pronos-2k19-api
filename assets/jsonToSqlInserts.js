@@ -6,11 +6,13 @@ let stadiumStatements = [],
     matchStatements = [],
     stageStatements = [];
 
-function toNULL(value, quoted=false) {
+function toNULL(value, quoted=false, date=false) {
     if(value == null) {
         return "NULL";
     } else if(quoted) {
         return `"${value}"`;
+    } else if(date) {
+        return `FROM_UNIXTIME(${value})`;
     } else {
         return value;
     }
@@ -93,8 +95,10 @@ let knockoutStages = [
 stages.push(...knockoutStages);
 
 stageStatements.push(...stages.map(stage => {
-    return `INSERT INTO stages(id, name) VALUES (
+    return `INSERT INTO stages(id, opening_time, closing_time, name) VALUES (
         ${toNULL(stage.id)},
+        ${toNULL(stage.opening_time, false, true)},
+        ${toNULL(stage.closing_time, false, true)},
         ${toNULL(stage.name, true)});`.replace(/\n/g, '');
 }));
 
@@ -216,10 +220,11 @@ matches.push(...groupMatches);
 matches.push(...knockoutMatches);
 
 matchStatements.push(...matches.map(match => {
-    return `INSERT INTO matches(id, stage_id, match_time, team_1, team2,
-        placeholder_1, placeholder_2, stadium_id, score, winner) VALUES (
-        ${toNULL(match.id)},
-        ${toNULL(match.match_time)},
+    return `INSERT INTO matches(id, stages_id, match_time, team_1, team_2,
+        placeholder_1, placeholder_2, stadiums_id, score, winner) VALUES (
+        ${match.id},
+        ${match.stage_id},
+        ${toNULL(match.match_time, false, true)},
         ${toNULL(match.team_1_id)},
         ${toNULL(match.team_2_id)},
         ${toNULL(match.placeholder_1, true)},
@@ -230,6 +235,10 @@ matchStatements.push(...matches.map(match => {
 }));
 
 let sqlStatements = [];
+sqlStatements.push('DELETE FROM matches;');
+sqlStatements.push('DELETE FROM stages;');
+sqlStatements.push('DELETE FROM teams;');
+sqlStatements.push('DELETE FROM stadiums;');
 sqlStatements.push(...stadiumStatements);
 sqlStatements.push(...stageStatements);
 sqlStatements.push(...teamStatements);
