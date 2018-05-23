@@ -185,19 +185,6 @@ def getMeAsUser():
             })
         print idM
 
-        """
-        id_match = str(sstable[0]["id"])
-        print id_match
-        cursor.execute("SELECT * FROM matches where id ='"+id_match+"'")
-        for row in cursor.fetchall():
-            sstable.append({
-                u'id': row[0],
-                u'match_time': row[2],
-                u'team1': row[3],
-                u'team2': row[4]
-            })
-
-        """
         table.append({u'predictions':sstable})
     
         con.commit()
