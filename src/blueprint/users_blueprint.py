@@ -31,8 +31,8 @@ As her name indicates, this method allow to get all users in database
 """
 @USERS_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_all_users():
-    #items = req.getAllUsers()
-    return flask_construct_response({u'items':Users})
+    items = req.getAllUsers()
+    return flask_construct_response({u'items':items})
 
 
 """
@@ -40,5 +40,5 @@ As her name indicates, this method allow to retrieve current connected user and 
 """
 @USERS_API_BLUEPRINT.route(u'/me', methods=[u'GET'])
 def get_me_as_user():
-    #items = req.getMeAsUser()
-    return flask_construct_response({u'items':Users[0]})
+    items = req.getMeAsUser()
+    return flask_construct_response({u'items':items})
