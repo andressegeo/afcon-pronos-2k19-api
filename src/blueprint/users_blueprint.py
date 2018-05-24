@@ -40,5 +40,5 @@ As her name indicates, this method allow to retrieve current connected user and 
 """
 @USERS_API_BLUEPRINT.route(u'/me', methods=[u'GET'])
 def get_me_as_user():
-    items = req.getMeAsUser()
+    items = req.get_me()
     return flask_construct_response({u'items':items})

@@ -47,6 +47,54 @@ def getAllMatches():
     return items
 
 
+def get_stages_and_matches():
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM stages")
+        results_stages = cursor.fetchall()
+        for row in results_stages:
+            matches = []
+            stadium = {}
+            cursor.execute("SELECT * FROM matches WHERE stages_id="+str(row[0]))
+            results_matches = cursor.fetchall()
+            for row2 in results_matches:
+                cursor.execute("SELECT * FROM stadiums WHERE id=" + str(row2[7]))
+                stadium = {}
+                for row3 in cursor.fetchall():
+                    stadium = {
+                        u'id': row3[0],
+                        u'lat': row3[1],
+                        u'lng': row3[2],
+                        u'name': row3[3],
+                        u'city': row3[4]
+                    }
+                matches.append({
+                    u'id': row2[0],
+                    u'stages_id': row2[1],
+                    u'match_time': row2[2],
+                    u'team_1': row2[3],
+                    u'team_2': row2[3],
+                    u'placeholder_1': row2[4],
+                    u'placeholder_2': row2[5],
+                    u'stadiums_id': row2[6],
+                    u'score': row2[7],
+                    u'winner': row2[8],
+                    u'stadium': stadium
+                })
+            items.append({
+                u'id': row[0],
+                u'name': row[1],
+                u'opening_time': row[2],
+                u'closing_time': row[3],
+                u'matches': matches
+            })
+        con.commit()
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+    return items
+
+
 
 def predictMatch():
     pass
@@ -117,9 +165,13 @@ All the users blueprint methods [2]
 def get_user_connect():
     user = users.get_current_user()
     if user:
-        nickname = user.nickname()
-        print nickname
-        return nickname 
+        ret_user = {
+            u'email': user.email(),
+            u'name': user.email(),
+            u'entity': user.email().split('@')[1]
+        }
+        print ret_user
+        return ret_user
     else:
         return "idk@kestuf.com"
 
@@ -144,12 +196,11 @@ def getAllUsers():
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
     return items
 
-def getMeAsUser():
 
-    
+def getMeAsUser():
     user = get_user_connect()
-    print (user) 
-    me = [] 
+    print (user)
+    me = []
     table = []
     sstable = []
     #check = "andresse.njeungoue@devteamgcloud.com"
@@ -166,11 +217,11 @@ def getMeAsUser():
                 u'worldcup_winner': row[5],
                 u'points': row[6]
             })
-        
+
         id = str(me[0]["id"])
         table.append({u'Me':me})
 
-        
+
 
         cursor.execute("SELECT * FROM predictions where users_id ='"+id+"'")
         for row in cursor.fetchall():
@@ -181,16 +232,84 @@ def getMeAsUser():
                 u'matches_id': row[1],
                 u'score': row[2],
                 u'fixture': getFixture(str(idM)),
-                u'winner': row[3]              
+                u'winner': row[3]
             })
         print idM
 
         table.append({u'predictions':sstable})
-    
+
         con.commit()
     except TypeError as e:
         print(e)
     return table
+
+
+def get_me():
+    user = get_user_connect()
+    print (user)
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM users where email ='"+user.get(u'email')+"'")
+        result = cursor.fetchall()
+        print 'HERE RESULT OF USER'
+        if len(result) == 0:
+            insert_new_user(user)
+        return get_user_and_predictions(user)
+    except TypeError as e:
+        print(e)
+
+
+def insert_new_user(user):
+    try:
+        cursor, con = connect()
+        cursor.execute("INSERT INTO users (email, entity, name) VALUES (%s, %s, %s)",
+                       (user.get(u'email'),
+                        user.get(u'entity'),
+                        user.get(u'name')))
+        con.commit()
+    except TypeError as e:
+        print(e)
+
+
+def get_user_and_predictions(user):
+    table = []
+    sstable = []
+    me = []
+    # check = "andresse.njeungoue@devteamgcloud.com"
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM users where email ='" + user.get(u'email') + "'")
+        user_db = cursor.fetchall()
+        if len(user_db) > 0:
+            for row in user_db:
+                me.append({
+                    u'id': row[0],
+                    u'email': row[1],
+                    u'name': row[2],
+                    u'entity': row[3],
+                    u'picture_url': row[4],
+                    u'worldcup_winner': row[5],
+                    u'points': row[6]
+                })
+            id = str(me[0]["id"])
+            table.append({u'Me': me})
+
+            cursor.execute("SELECT * FROM predictions where users_id ='" + str(id) + "'")
+            for row in cursor.fetchall():
+                idM = row[0]
+                sstable.append({
+                    u'id': row[0],
+                    u'matches_id': row[1],
+                    u'score': row[2],
+                    u'fixture': getFixture(str(idM)),
+                    u'winner': row[3]
+                })
+
+            table.append({u'predictions': sstable})
+    except TypeError as e:
+        print(e)
+    return table
+
 
 def getTeam(id):
     try:
@@ -225,7 +344,7 @@ def getFixture(id):
     except TypeError as e:
         print(e)
     return fixture
-     
+
 """
 All the winner_prediction blueprint methods [3]
 """
