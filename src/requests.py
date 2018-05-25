@@ -78,8 +78,8 @@ def get_stages_and_matches():
                     u'placeholder_1': row2[4],
                     u'placeholder_2': row2[5],
                     u'stadiums_id': row2[6],
-                    u'score': row2[7],
-                    u'winner': row2[8],
+                    u'score': row2[8],
+                    u'winner': row2[9],
                     u'stadium': stadium
                 })
             items.append({
