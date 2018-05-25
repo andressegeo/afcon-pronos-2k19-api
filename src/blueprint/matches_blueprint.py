@@ -20,16 +20,18 @@ def get_all_matches():
 """
 As her name indicates, this method allow to send the current user prediction for this game
 """
-@MATCHES_API_BLUEPRINT.route(u'/<int:id>/predict', methods=[u'POST'])
-def predict_one_match():
-    items = req.predictMatch()
+@MATCHES_API_BLUEPRINT.route(u'/<int:match_id>/predict', methods=[u'POST'])
+def predict_one_match(match_id):
+    prediction = request.get_json().get(u'prediction')
+    items = req.predictMatch(prediction)
     return flask_construct_response({u'items':items})
 
 
 """
 As her name indicates, this method allow to send the game score
 """
-@MATCHES_API_BLUEPRINT.route(u'/<int:id>/enter_score', methods=[u'POST'])
-def scoring_one_match():
-    items = req.scoringMatch()
+@MATCHES_API_BLUEPRINT.route(u'/<int:match_id>/enter_score', methods=[u'POST'])
+def scoring_one_match(match_id):
+    result = request.get_json().get(u'result')
+    items = req.scoringMatch(match_id, result)
     return flask_construct_response({u'items':items})

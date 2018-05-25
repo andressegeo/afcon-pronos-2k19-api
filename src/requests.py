@@ -96,12 +96,46 @@ def get_stages_and_matches():
 
 
 
-def predictMatch():
-    pass
+def predictMatch(prediction):
+    items = []
+    try:
+        print prediction
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM predictions where matches_id=" + str(prediction.get(u'matches_id')) + " AND users_id=" + str(prediction.get(u'users_id')))
+        result = cursor.fetchall()
+        if prediction.get(u'winner') is not None:
+            prediction[u'winner'] = str(prediction[u'winner'])
+        if len(result) > 0:
+            cursor.execute("UPDATE predictions SET score=%s, winner=%s WHERE id=%s",
+                           (prediction.get(u'score'),
+                            prediction.get(u'winner'),
+                            result[0][0]
+                            ))
+        else:
+            cursor.execute("INSERT INTO predictions (matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)",
+                           (str(prediction.get(u'matches_id')),
+                            prediction.get(u'score'),
+                            prediction.get(u'winner'),
+                            str(prediction.get(u'users_id'))))
+        con.commit()
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+    return items
 
 
-def scoringMatch():
-    pass
+def scoringMatch(match_id, result):
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("UPDATE matches SET score=%s, winner=%s WHERE id=%s",
+                       (result.get(u'score'),
+                        result.get(u'winner'),
+                        match_id
+                        ))
+        con.commit()
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+    return items
 
 
 """
@@ -156,6 +190,27 @@ def getAllTeams():
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
     return items
+
+
+def get_team(team_id):
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM teams WHERE id="+str(team_id))
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id' : row[0],
+                u'name' : row[1],
+                u'iso2' : row[2],
+                u'flag_url' : row[3],
+                u'eliminated' : row[4]
+            })
+        con.commit()
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+    return items
+
 
 
 """
@@ -262,10 +317,10 @@ def get_me():
 def insert_new_user(user):
     try:
         cursor, con = connect()
-        cursor.execute("INSERT INTO users (email, entity, name) VALUES (%s, %s, %s)",
+        cursor.execute("INSERT INTO users (email, entity, name, is_admin) VALUES (%s, %s, %s, %s)",
                        (user.get(u'email'),
                         user.get(u'entity'),
-                        user.get(u'name')))
+                        user.get(u'name'), False))
         con.commit()
     except TypeError as e:
         print(e)
@@ -289,7 +344,8 @@ def get_user_and_predictions(user):
                     u'entity': row[3],
                     u'picture_url': row[4],
                     u'worldcup_winner': row[5],
-                    u'points': row[6]
+                    u'points': row[6],
+                    u'is_admin': row[7],
                 })
             id = str(me[0]["id"])
             table.append({u'Me': me})
@@ -323,6 +379,23 @@ def getTeam(id):
     return team
 
 
+def get_all_predictions(user_id):
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM predictions where users_id ="+str(user_id))
+        for row in cursor.fetchall():
+            items.append({
+                u"id": row[0],
+                u"matches_id": row[1],
+                u"score": row[2],
+                u"winner": row[3],
+                u"users_id": row[4]
+            })
+    except TypeError as e:
+        print(e)
+    return items
+
 
 def getFixture(id):
     print "here"
@@ -348,14 +421,45 @@ def getFixture(id):
 """
 All the winner_prediction blueprint methods [3]
 """
-def getPredictionWinner():
-    pass
+def getPredictionWinner(user_id):
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT t.id, t.name, t.iso2, t.flag_url, t.eliminated FROM teams t JOIN users u ON u.worldcup_winner = t.id WHERE u.id=" + str(user_id))
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id': row[0],
+                u'name': row[1],
+                u'iso2': row[2],
+                u'flag_url': row[3],
+                u'eliminated': row[4]
+            })
+        con.commit()
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+    return items
+
 
 def getOnePrediction():
     pass
 
-def addWinner():
-    pass
+def addWinner(winner, user):
+    try:
+        cursor, con = connect()
+        cursor.execute("UPDATE users SET worldcup_winner=" + str(winner.get(u'id')) + " WHERE id='" + str(user.get(u'id')) + "'")
+        con.commit()
+    except TypeError as e:
+        print(e)
+
+
+def post_winner_wc(winner):
+    try:
+        cursor, con = connect()
+        cursor.execute("UPDATE worldcup SET winner=" + str(winner.get(u'id')))
+        con.commit()
+    except TypeError as e:
+        print(e)
 
 if __name__ == '__main__':
     pass
