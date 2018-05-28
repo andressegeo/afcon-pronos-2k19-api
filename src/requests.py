@@ -102,7 +102,7 @@ def getAllTeams():
                 u'name' : row[1],
                 u'iso2' : row[2],
                 u'flag_url' : row[3],
-                u'eliminated' : row[4]
+                u'eliminated' : 'false' if row[4] == 0 else 'true'
             })
         con.commit()
     except BaseException, e:
