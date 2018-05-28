@@ -4,12 +4,11 @@ Configuration file.
 """
 import logging
 
-
 CONFIG = {
     u"db": {
         u"user": u"root",
-        u"host" : u"127.0.0.1",
-        u"password": u"",
+        u"host": u"127.0.0.1",
+        u"password": u"qbxcl0udSQL",
         u"database": u"worldcup_2018",
         u"charset": u"utf-8"
     },

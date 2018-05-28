@@ -28,7 +28,7 @@ def getAllMatches():
         cursor, con = connect()
         cursor.execute("SELECT * FROM matches")
         for row in cursor.fetchall():
-            print(row)
+            # print(row)
             items.append({
                 u'id' : row[0],
                 u'stages_id' : row[1],
@@ -96,7 +96,7 @@ def getAllTeams():
         cursor, con = connect()
         cursor.execute("SELECT * FROM teams")
         for row in cursor.fetchall():
-            print(row)
+            # print(row)
             items.append({
                 u'id' : row[0],
                 u'name' : row[1],
