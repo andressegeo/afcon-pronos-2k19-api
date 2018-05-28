@@ -133,8 +133,9 @@ def check_user_exist():
 def get_user_connect():
     user = users.get_current_user()
     if user:
-        nickname = user.nickname()
-
+        nickname = user.email()
+        entity = nickname.split("@")[1]
+        print entity
         try:
             cursor, con = connect()
             cursor.execute( "SELECT email FROM users where email ='"+nickname+"'" )    
@@ -145,10 +146,10 @@ def get_user_connect():
                 exist
             except NameError:
                 var_exists = False
-                print var_exists
+                #print var_exists
                 
-                req = "INSERT INTO users(email) VALUES (%s)"
-                cursor.execute(req, [nickname])
+                req = "INSERT INTO users(email,entity) VALUES (%s,%s)"
+                cursor.execute(req, [nickname,entity])
                 con.commit()
             else:
                 var_exists = True
