@@ -11,7 +11,12 @@ As her name indicates, this method allow to get the winner prediction according 
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_prediction_winner():
     items = req.getPredictionWinner()
-    return flask_construct_response({u'items':items})
+    print items
+    if items == 0:   
+        return flask_construct_response({u'response':"Vous n'avez pas encore saisi votre prediction"})
+    else:
+        return flask_construct_response({u'items':items})
+
 
 
 """
@@ -28,8 +33,18 @@ As her name indicates, this method allow to post by user the winner prediction o
 """
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
-    items = req.addWinner()
-    return flask_construct_response({u'items':items})
+    try:
+        win = request.data
+        items = req.addWinner(win)
+        print items
+        if check == 1:
+            return flask_construct_response({u'status':'insert successfull'}), 200
+        else:
+            return flask_construct_response({u'status':'Error during insertion'}), 400
+
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return "Error"
 
 
 

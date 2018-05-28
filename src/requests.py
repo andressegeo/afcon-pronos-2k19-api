@@ -106,7 +106,7 @@ def getAllTeams():
             })
         con.commit()
     except BaseException, e:
-        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+        logging.error(u'Failed : {}'.format(unicode(e).encode(u'utf-8')))
     return items
 
 
@@ -114,22 +114,62 @@ def getAllTeams():
 All the users blueprint methods [2]
 """
 
+def check_user_exist():
+    name = get_user_connect()
+    try:
+        cursor, con = connect()
+        cursor.execute( "SELECT email FROM users where email ='"+name+"'" )    
+        for row in cursor.fetchall():
+            exist = row[0]
+        con.commit()
+        print exist
+        return "exits"
+    except BaseException, e:
+        logging.error(u'Failed : {}'.format(unicode(e).encode(u'utf-8')))
+
+"""
+    Help to check the first connection and insert in database.
+"""
 def get_user_connect():
     user = users.get_current_user()
     if user:
         nickname = user.nickname()
-        print nickname
-        return nickname 
+
+        try:
+            cursor, con = connect()
+            cursor.execute( "SELECT email FROM users where email ='"+nickname+"'" )    
+            for row in cursor.fetchall():
+                exist = row[0]
+                print exist
+            try:
+                exist
+            except NameError:
+                var_exists = False
+                print var_exists
+                
+                req = "INSERT INTO users(email) VALUES (%s)"
+                cursor.execute(req, [nickname])
+                con.commit()
+            else:
+                var_exists = True
+            print var_exists
+            
+        except BaseException, e:
+            logging.error(u'Failed : {}'.format(unicode(e).encode(u'utf-8')))
+
+        return nickname
+        
     else:
         return "idk@kestuf.com"
 
 def getAllUsers():
+    get_user_connect()
     items = []
     try:
         cursor, con = connect()
         cursor.execute("SELECT * FROM users")
         for row in cursor.fetchall():
-            print(row)
+            #print(row)
             items.append({
                 u'id' : row[0],
                 u'email' : row[1],
@@ -146,13 +186,11 @@ def getAllUsers():
 
 def getMeAsUser():
 
-    
     user = get_user_connect()
     print (user) 
     me = [] 
     table = []
     sstable = []
-    #check = "andresse.njeungoue@devteamgcloud.com"
     try:
         cursor, con = connect()
         cursor.execute("SELECT * FROM users where email ='"+user+"'")
@@ -170,7 +208,7 @@ def getMeAsUser():
         id = str(me[0]["id"])
         table.append({u'Me':me})
 
-        
+        print table
 
         cursor.execute("SELECT * FROM predictions where users_id ='"+id+"'")
         for row in cursor.fetchall():
@@ -183,7 +221,17 @@ def getMeAsUser():
                 u'fixture': getFixture(str(idM)),
                 u'winner': row[3]              
             })
-        print idM
+        #print idM
+
+        try:
+            idM
+        except NameError:
+            var_exists = False
+            print var_exists
+        else:
+            var_exists = True
+        print var_exists
+
 
         table.append({u'predictions':sstable})
     
@@ -230,13 +278,36 @@ def getFixture(id):
 All the winner_prediction blueprint methods [3]
 """
 def getPredictionWinner():
-    pass
+    user = get_user_connect()
+    print user
+    tab = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT worldcup_winner FROM users where email ='"+user+"'")
+        for row in cursor.fetchall():
+            winner = getTeam(str(row[0]))
+            tab.append({
+                u'user': user,
+                u'winner_prediction': winner
+            })
+        return tab
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
 
 def getOnePrediction():
     pass
 
-def addWinner():
-    pass
+def addWinner(win):
+    try:
+        cursor, con = connect()
+        Winner = "INSERT INTO users(worldcup_winner) VALUES (%s)"
+        cursor.execute(Winner, [win])
+        con.commit()
+        return 1
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
 
 if __name__ == '__main__':
     pass
