@@ -34,14 +34,19 @@ As her name indicates, this method allow to post by user the winner prediction o
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
     try:
-        win = request.data
-        items = req.addWinner(win)
-        print items
+        win = json.loads(request.data)
+        check = req.addWinner(win)
+        #print check
+        
+        print check
         if check == 1:
-            return flask_construct_response({u'status':'insert successfull'}), 200
+            return flask_construct_response({u'response':'Insert successfull'})
+        elif check == 0:
+            return flask_construct_response({u'response':'Error during insertion'})
+        elif check == 2:
+            return flask_construct_response({u'response':'You have not right to update the prediction'})
         else:
-            return flask_construct_response({u'status':'Error during insertion'}), 400
-
+            return flask_construct_response({u'response':'Nothing' })
     except BaseException, e:
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return "Error"

@@ -3,6 +3,7 @@
 from google.appengine.api import users
 from flask import jsonify, json
 from config import CONFIG
+from datetime import datetime
 import MySQLdb
 import logging
 
@@ -300,16 +301,42 @@ def getOnePrediction():
     pass
 
 def addWinner(win):
-    try:
-        cursor, con = connect()
-        Winner = "INSERT INTO users(worldcup_winner) VALUES (%s)"
-        cursor.execute(Winner, [win])
-        con.commit()
-        return 1
-    except BaseException, e:
-        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
-        return 0
+    win = win["worldcup_winner"]
+    print (win)
+    print type(win)
+    user = users.get_current_user()
+    email = user.email()
+    print email
+    last = datetime(2018, 6, 28)
+    end_last = datetime(2018, 6, 30)
+    present = datetime.now()
+    print present
+    if present < last:
+        print "true"
+        print "U can modify prediction but, des pts en moins"
+        try:
+            cursor, con = connect()
+            cursor.execute("UPDATE users SET worldcup_winner ="+str(win)+" where email = '"+str(email)+"'")
+            con.commit()
+            return 1
+        except BaseException, e:
+            logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+            return 0
 
+    elif last < present < end_last:
+        print "false"
+        print "U can't modify prediction, it's close"
+        try:
+            cursor, con = connect()
+            cursor.execute("UPDATE users SET worldcup_winner ="+str(win)+", has_modified_worldcup_winner = 1 where email = '"+str(email)+"'")
+            con.commit()
+            return 1
+        except BaseException, e:
+            logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+            return 0
+    else:
+        print "prohibido"
+        return 2
 if __name__ == '__main__':
     pass
 
