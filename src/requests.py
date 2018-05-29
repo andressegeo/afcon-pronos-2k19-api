@@ -111,14 +111,66 @@ def getAllMatches():
     
     return items
 
+def compare(a, b):
+    return 1 if a > b else 99 if a == b else 2
+
+def get_user_id(email):
+    try:
+        cursor, con = connect()
+        cursor.execute( "SELECT id FROM users where email ='"+email+"'" )    
+        for row in cursor.fetchall():
+            id_user = row[0]
+            print id_user
+        return id_user
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
 
 
-def predictMatch():
-    pass
+def predictMatch(id, predict):
+    matches_id = id
+    print u"id is: {}".format(unicode(id).encode(u'utf-8'))
+    score = predict["score"]
+    winner = predict["winner"]
+    print u"winner is: {}".format(winner)
+    user = users.get_current_user()
+    email = user.email()
+    print email
+    users_id = get_user_id(email)
+    
+    try:
+        cursor, con = connect()
+        req = "INSERT INTO predictions(matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)"
+        cursor.execute(req, [matches_id,score, winner, users_id])
+        con.commit()
+        return 1
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
+    
+        
 
 
-def scoringMatch():
-    pass
+def scoringMatch(id, predict):
+    matches_id = id
+    print u"id is: {}".format(unicode(id).encode(u'utf-8'))
+    score = predict["score"]
+    winner = predict["winner"]
+    print u"winner is: {}".format(winner)
+    user = users.get_current_user()
+    email = user.email()
+    print email
+    users_id = get_user_id(email)
+    
+    try:
+        cursor, con = connect()
+        req = "INSERT INTO predictions(matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)"
+        cursor.execute(req, [matches_id,score, winner, users_id])
+        con.commit()
+        return 1
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
 
 
 """
@@ -367,8 +419,6 @@ def getOnePrediction():
 
 def addWinner(win):
     win = win["worldcup_winner"]
-    print (win)
-    print type(win)
     user = users.get_current_user()
     email = user.email()
     print email
