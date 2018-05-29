@@ -19,32 +19,96 @@ def connect():
     cursor = con.cursor()
     return cursor, con
 
-"""
-All the matches blueprint methods [3]
-"""
-
-def getAllMatches():
+def infos_team(team_id):
     items = []
     try:
         cursor, con = connect()
-        cursor.execute("SELECT * FROM matches")
+        cursor.execute("SELECT * FROM teams where id = "+str(team_id)+"")
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id' : row[0],
+                u'name' : row[1],
+                u'iso2' : row[2],
+                u'flag_url' : row[3],
+                u'eliminated' : 'false' if row[4] == 0 else 'true'
+            })
+        con.commit()
+
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+
+    return items
+
+def infos_stadium(stadium_id):
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM stadiums where id = "+str(stadium_id)+"")
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id' : row[0],
+                u'lat' : row[1],
+                u'lng' : row[2],
+                u'name' : row[3],
+                u'city' : row[0],
+            })
+        con.commit()
+
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+        
+    return items
+
+"""
+All the matches blueprint methods [3]
+"""
+def construct_matches(stages_id):
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM matches where stages_id = "+str(stages_id)+"")
         for row in cursor.fetchall():
             print(row)
             items.append({
                 u'id' : row[0],
                 u'stages_id' : row[1],
                 u'match_time' : row[2],
-                u'team_1' : row[3],
-                u'team_2' : row[4],
+                u'team_1' : infos_team(row[3]),
+                u'team_2' : infos_team(row[4]),
                 u'placeholder_1' : row[5],
                 u'placeholder_2' : row[6],
-                u'stadiums_id' : row[7],
+                u'stadiums_id' : infos_stadium(row[7]),
                 u'score' : row[8],
                 u'winner' : row[9]
             })
         con.commit()
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+
+    return items
+
+def getAllMatches():
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM stages")
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id' : row[0],
+                u'name' : row[1],
+                u'opening_time' : row[2],
+                u'closing_time' : row[3],
+                u'matches' : construct_matches(row[0]),
+            })
+        con.commit()
+
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+
+    
     return items
 
 
