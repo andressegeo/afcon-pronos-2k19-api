@@ -97,7 +97,6 @@ def getAllTeams():
         cursor, con = connect()
         cursor.execute("SELECT * FROM teams")
         for row in cursor.fetchall():
-            print(row)
             items.append({
                 u'id' : row[0],
                 u'name' : row[1],
@@ -106,9 +105,11 @@ def getAllTeams():
                 u'eliminated' : 'false' if row[4] == 0 else 'true'
             })
         con.commit()
+        return items
     except BaseException, e:
         logging.error(u'Failed : {}'.format(unicode(e).encode(u'utf-8')))
-    return items
+        return 0
+    
 
 
 """
