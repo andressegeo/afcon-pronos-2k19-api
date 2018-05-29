@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS `worldcup_2018`.`stadiums` ;
 DROP TABLE IF EXISTS `worldcup_2018`.`users` ;
 DROP TABLE IF EXISTS `worldcup_2018`.`teams` ;
 
+
 -- -----------------------------------------------------
 -- Table `worldcup_2018`.`stadiums`
 -- -----------------------------------------------------
@@ -63,8 +64,10 @@ CREATE TABLE IF NOT EXISTS `worldcup_2018`.`users` (
   `picture_url` VARCHAR(255) NULL,
   `worldcup_winner` INT NULL,
   `points` INT NOT NULL DEFAULT 0,
+  `is_admin` TINYINT(1) NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   INDEX `fk_users_teams_idx` (`worldcup_winner` ASC),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC),
   CONSTRAINT `fk_users_teams`
     FOREIGN KEY (`worldcup_winner`)
     REFERENCES `worldcup_2018`.`teams` (`id`)
@@ -152,6 +155,7 @@ CREATE TABLE IF NOT EXISTS `worldcup_2018`.`predictions` (
   INDEX `fk_predictions_matches1_idx` (`matches_id` ASC),
   INDEX `fk_predictions_teams1_idx` (`winner` ASC),
   INDEX `fk_predictions_users1_idx` (`users_id` ASC),
+  UNIQUE INDEX `uq_user_match` (`users_id` ASC, `matches_id` ASC),
   CONSTRAINT `fk_predictions_matches1`
     FOREIGN KEY (`matches_id`)
     REFERENCES `worldcup_2018`.`matches` (`id`)

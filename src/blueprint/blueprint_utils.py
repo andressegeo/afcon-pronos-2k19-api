@@ -4,10 +4,14 @@ Blueprint utils methods
 """
 
 import json
-from functools import wraps
-from cerberus import Validator
-from flask import jsonify, request
 from collections import OrderedDict
+from functools import wraps
+
+from cerberus import Validator
+from flask import jsonify, request, abort
+from google.appengine.api import users
+
+from src.requests import is_user_in_db, insert_new_user
 
 
 def flask_constructor_error(message, status=500, custom_error_code=None, error_payload=None):
@@ -85,7 +89,6 @@ def flask_check_args(validation_schema):
 
 
 def flask_check_and_inject_payload(validation_schema=None):
-
     def decorated(funct):
 
         @wraps(funct)
@@ -124,3 +127,16 @@ def flask_check_and_inject_payload(validation_schema=None):
         return wrapper
 
     return decorated
+
+
+def define_before_request_function(app):
+    @app.before_request
+    def before_request():
+        user = users.get_current_user()
+        if user:
+            if is_user_in_db(user):
+                return
+            else:
+                if insert_new_user(user):
+                    return
+        abort(403)
