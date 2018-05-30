@@ -8,7 +8,7 @@ CONFIG = {
     u"db": {
         u"user": u"root",
         u"host" : u"127.0.0.1",
-        u"password": u"localroot1234",
+        u"password": u"qbxcl0udSQL",
         u"database": u"worldcup_2018",
         u"charset": u"utf-8"
     },
