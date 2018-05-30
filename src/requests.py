@@ -195,9 +195,11 @@ def scoringMatch(match_id, result):
                         match_id
                         ))
         con.commit()
+        return 1
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
-    return items
+        return 0
+    
 
 
 def get_user_id(email):
@@ -234,7 +236,7 @@ def predictMatch(id, predict):
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return 0
 
-
+"""
 def scoringMatch(id, predict):
     matches_id = id
     print u"id is: {}".format(unicode(id).encode(u'utf-8'))
@@ -255,7 +257,7 @@ def scoringMatch(id, predict):
     except BaseException, e:
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return 0
-
+"""
 
 
 def getFixture(id):
