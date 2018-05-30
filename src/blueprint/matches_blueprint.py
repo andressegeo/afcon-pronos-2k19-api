@@ -20,16 +20,22 @@ def get_all_matches():
     return flask_construct_response({u'items': items})
 
 
+@MATCHES_API_BLUEPRINT.route(u'/<int:id>/predict', methods=[u'POST'])
+def predict_one_match(id):
+    predict = json.loads(request.data)
+    my_predict = req.predict(id, predict)
+    return flask_construct_response({u'items': my_predict})
+
 """
 As her name indicates, this method allow to send the current user prediction for this game
 """
 
-
+"""
 @MATCHES_API_BLUEPRINT.route(u'/<int:id>/predict', methods=[u'POST'])
 def predict_one_match(id):
     try:
         predict = json.loads(request.data)
-        check = req.predictMatch(id, predict)
+        check = req.predict(id, predict)
 
         print check
         if check == 1:
@@ -44,11 +50,9 @@ def predict_one_match(id):
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return "Error"
 
-"""
-As her name indicates, this method allow to send the game score by admin
-"""
 
 
+"""
 """
 @MATCHES_API_BLUEPRINT.route(u'/<int:match_id>/enter_score', methods=[u'POST'])
 def scoring_one_match(match_id):
