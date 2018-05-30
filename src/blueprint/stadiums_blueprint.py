@@ -2,7 +2,8 @@ from flask import Blueprint
 
 import src.requests as req
 from .blueprint_utils import flask_construct_response
-
+import time
+import datetime
 STADIUMS_API_BLUEPRINT = Blueprint(u'stadiums_api', __name__)
 
 """
@@ -14,3 +15,4 @@ As her name indicates, this method allow to get all stadiums of the tournament
 def get_all_stadiums():
     items = req.getAllStadiums()
     return flask_construct_response({u'items': items})
+
