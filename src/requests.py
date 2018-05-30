@@ -539,6 +539,25 @@ def addWinner(winner):
     return winner_id
 """
 
+def get_worldcup_winner():
+    try:
+
+        cursor, con = connect()
+        query = u"SELECT * FROM worldcup"
+        cursor.execute(query)
+
+        winner = cursor.fetchone()
+        result = {
+            u"winner_id":winner[0],
+            u"opening_time":winner[0],
+            u"closing_time":winner[0]
+        }
+        return result
+    except BaseException, e:
+        logging.error(u'Failed: {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
+    
+
 def retrieve_my_winner(user):
     if user.get(u"worldcup_winner"):
         cursor, con = connect()

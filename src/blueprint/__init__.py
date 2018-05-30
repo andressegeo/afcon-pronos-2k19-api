@@ -4,5 +4,6 @@ from .matches_blueprint import MATCHES_API_BLUEPRINT
 from .winner_prediction_blueprint import WINNER_PREDICTION_API_BLUEPRINT
 from .ranking_blueprint import RANKING_API_BLUEPRINT
 from .stadiums_blueprint import STADIUMS_API_BLUEPRINT
+from .winner_blueprint import WINNER_API_BLUEPRINT
 
 
