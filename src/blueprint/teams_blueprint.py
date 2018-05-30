@@ -13,7 +13,7 @@ As her name indicates, this method allow to get all teams in database
 @TEAMS_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_all_teams():
     items = req.getAllTeams()
-    print u"TEAMS" + unicode(items[0])
+    #print u"TEAMS" + unicode(items[0])
     return flask_construct_response({u'items': items})
 
 

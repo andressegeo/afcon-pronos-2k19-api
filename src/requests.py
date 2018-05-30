@@ -1,5 +1,8 @@
 # coding: utf-8
+
 # !/usr/bin/python
+
+from datetime import datetime
 import MySQLdb
 import logging
 
@@ -31,28 +34,106 @@ def connect():
 
 
 def getAllMatches():
+    pass
+
+def infos_team(team_id):
     items = []
     try:
         cursor, con = connect()
-        cursor.execute("SELECT * FROM matches")
+        cursor.execute("SELECT * FROM teams where id = " + str(team_id) + "")
         for row in cursor.fetchall():
-            # print(row)
+            print(row)
             items.append({
                 u'id': row[0],
-                u'stages_id': row[1],
-                u'match_time': row[2],
-                u'team_1': row[3],
-                u'team_2': row[4],
-                u'placeholder_1': row[5],
-                u'placeholder_2': row[6],
-                u'stadiums_id': row[7],
-                u'score': row[8],
-                u'winner': row[9]
+                u'name': row[1],
+                u'iso2': row[2],
+                u'flag_url': row[3],
+                u'eliminated': 'false' if row[4] == 0 else 'true'
+            })
+        con.commit()
+
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+
+    return items
+
+
+def infos_stadium(stadium_id):
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM stadiums where id = " + str(stadium_id) + "")
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id': row[0],
+                u'lat': row[1],
+                u'lng': row[2],
+                u'name': row[3],
+                u'city': row[0],
+            })
+        con.commit()
+
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+
+    return items
+
+
+"""
+All the matches blueprint methods [3]
+"""
+
+def construct_matches(stages_id):
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM matches where stages_id = "+str(stages_id)+"")
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id' : row[0],
+                u'stages_id' : row[1],
+                u'match_time' : row[2],
+                u'team_1' : infos_team(row[3]),
+                u'team_2' : infos_team(row[4]),
+                u'placeholder_1' : row[5],
+                u'placeholder_2' : row[6],
+                u'stadiums_id' : infos_stadium(row[7]),
+                u'score' : row[8],
+                u'winner' : row[9]
             })
         con.commit()
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+
     return items
+
+
+def getAllMatches():
+    items = []
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM stages")
+        for row in cursor.fetchall():
+            print(row)
+            items.append({
+                u'id': row[0],
+                u'name': row[1],
+                u'opening_time': row[2],
+                u'closing_time': row[3],
+                u'matches': construct_matches(row[0]),
+            })
+        con.commit()
+
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+
+    return items
+
+
+def compare(a, b):
+    return 1 if a > b else 99 if a == b else 2
 
 
 def get_stages_and_matches():
@@ -118,6 +199,64 @@ def scoringMatch(match_id, result):
     return items
 
 
+def get_user_id(email):
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT id FROM users where email ='" + email + "'")
+        for row in cursor.fetchall():
+            id_user = row[0]
+            print id_user
+        return id_user
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
+
+
+def predictMatch(id, predict):
+    matches_id = id
+    print u"id is: {}".format(unicode(id).encode(u'utf-8'))
+    score = predict["score"]
+    winner = predict["winner"]
+    print u"winner is: {}".format(winner)
+    user = users.get_current_user()
+    email = user.email()
+    print email
+    users_id = get_user_id(email)
+
+    try:
+        cursor, con = connect()
+        req = "INSERT INTO predictions(matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)"
+        cursor.execute(req, [matches_id, score, winner, users_id])
+        con.commit()
+        return 1
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
+
+
+def scoringMatch(id, predict):
+    matches_id = id
+    print u"id is: {}".format(unicode(id).encode(u'utf-8'))
+    score = predict["score"]
+    winner = predict["winner"]
+    print u"winner is: {}".format(winner)
+    user = users.get_current_user()
+    email = user.email()
+    print email
+    users_id = get_user_id(email)
+
+    try:
+        cursor, con = connect()
+        req = "INSERT INTO predictions(matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)"
+        cursor.execute(req, [matches_id, score, winner, users_id])
+        con.commit()
+        return 1
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
+
+
+
 def getFixture(id):
     print "here"
     fixture = []
@@ -180,7 +319,6 @@ def getAllTeams():
         cursor, con = connect()
         cursor.execute("SELECT * FROM teams")
         for row in cursor.fetchall():
-            # print(row)
             items.append({
                 u'id': row[0],
                 u'name': row[1],
@@ -189,9 +327,10 @@ def getAllTeams():
                 u'eliminated': 'false' if row[4] == 0 else 'true'
             })
         con.commit()
+        return items
     except BaseException, e:
         logging.error(u'Failed : {}'.format(unicode(e).encode(u'utf-8')))
-    return items
+        return 0
 
 
 def get_team(team_id):
@@ -397,9 +536,7 @@ def addWinner(winner):
 
 
 def retrieve_my_winner(user):
-
     if user.get(u"worldcup_winner"):
-
         cursor, con = connect()
         query = u"SELECT * FROM teams where id = {}".format(user.get(u"worldcup_winner"))
         cursor.execute(query)
@@ -590,8 +727,6 @@ def retrieve_my_predictions(user):
 
     return user
 
-    # ################################
-
 
 # ################################
 # Part - WorldCup
@@ -605,3 +740,45 @@ def post_winner_wc(winner):
         con.commit()
     except TypeError as e:
         print(e)
+
+
+def addWinner(win):
+    win = win["worldcup_winner"]
+    user = users.get_current_user()
+    email = user.email()
+    print email
+    last = datetime(2018, 6, 28)
+    end_last = datetime(2018, 6, 30)
+    present = datetime.now()
+    print present
+    if present < last:
+        print "true"
+        print "U can modify prediction but, des pts en moins"
+        try:
+            cursor, con = connect()
+            cursor.execute("UPDATE users SET worldcup_winner =" + str(win) + " where email = '" + str(email) + "'")
+            con.commit()
+            return 1
+        except BaseException, e:
+            logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+            return 0
+
+    elif last < present < end_last:
+        print "false"
+        print "U can't modify prediction, it's close"
+        try:
+            cursor, con = connect()
+            cursor.execute("UPDATE users SET worldcup_winner =" + str(
+                win) + ", has_modified_worldcup_winner = 1 where email = '" + str(email) + "'")
+            con.commit()
+            return 1
+        except BaseException, e:
+            logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+            return 0
+    else:
+        print "prohibido"
+        return 2
+
+
+if __name__ == '__main__':
+    pass
