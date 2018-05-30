@@ -151,26 +151,8 @@ def predictMatch(id, predict):
         
 
 
-def scoringMatch(id, predict):
-    matches_id = id
-    print u"id is: {}".format(unicode(id).encode(u'utf-8'))
-    score = predict["score"]
-    winner = predict["winner"]
-    print u"winner is: {}".format(winner)
-    user = users.get_current_user()
-    email = user.email()
-    print email
-    users_id = get_user_id(email)
-    
-    try:
-        cursor, con = connect()
-        req = "INSERT INTO predictions(matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)"
-        cursor.execute(req, [matches_id,score, winner, users_id])
-        con.commit()
-        return 1
-    except BaseException, e:
-        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
-        return 0
+def scoringMatch():
+    pass
 
 
 """
