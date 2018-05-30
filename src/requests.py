@@ -94,7 +94,7 @@ def construct_matches(stages_id):
             items.append({
                 u'id': row[0],
                 u'stages_id': row[1],
-                u'match_time': row[2],
+                u'match_time': datetime_to_float(row[2]),
                 u'team_1': infos_team(row[3]),
                 u'team_2': infos_team(row[4]),
                 u'placeholder_1': row[5],
@@ -119,8 +119,8 @@ def getAllMatches():
             items.append({
                 u'id': row[0],
                 u'name': row[1],
-                u'opening_time': row[2],
-                u'closing_time': row[3],
+                u'opening_time': datetime_to_float(row[2]),
+                u'closing_time': datetime_to_float(row[3]),
                 u'matches': construct_matches(row[0]),
             })
         con.commit()
@@ -128,10 +128,6 @@ def getAllMatches():
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
     return items
-
-
-def compare(a, b):
-    return 1 if a > b else 99 if a == b else 2
 
 
 def get_stages_and_matches():
@@ -231,8 +227,8 @@ def get_match(match_id):
         stage = {
             u"id": my_match[10],
             u"name": my_match[11],
-            u"opening_time": my_match[12],
-            u"closing_time": my_match[13],
+            u"opening_time": datetime_to_float(my_match[12]),
+            u"closing_time": datetime_to_float(my_match[13]),
         }
         return {
             u"id": my_match[0],
@@ -607,25 +603,6 @@ def addWinner(winner):
 """
 
 
-def get_worldcup_winner():
-    try:
-
-        cursor, con = connect()
-        query = u"SELECT * FROM worldcup"
-        cursor.execute(query)
-
-        winner = cursor.fetchone()
-        result = {
-            u"winner_id": winner[0],
-            u"opening_time": winner[0],
-            u"closing_time": winner[0]
-        }
-        return result
-    except BaseException, e:
-        logging.error(u'Failed: {}'.format(unicode(e).encode(u'utf-8')))
-        return 0
-
-
 def retrieve_my_winner(user):
     if user.get(u"worldcup_winner"):
         cursor, con = connect()
@@ -728,10 +705,13 @@ def predict(match_id, prediction):
 
 
 def datetime_to_float(d):
-    epoch = datetime.utcfromtimestamp(0)
-    total_seconds = (d - epoch).total_seconds()
-    # total_seconds will be in decimals (millisecond precision)
-    return total_seconds
+    try:
+        epoch = datetime.utcfromtimestamp(0)
+        total_seconds = (d - epoch).total_seconds()
+        # total_seconds will be in decimals (millisecond precision)
+        return total_seconds
+    except:
+        return d
 
 
 def prediction_allowed(match_id):
@@ -743,12 +723,12 @@ def prediction_allowed(match_id):
         print u"MY MATCH "+unicode(match)
         if match:
             stage = match.get(u"stage")
-            if now < datetime_to_float(stage.get(u"opening_time")):
+            if now < stage.get(u"opening_time"):
                 print u"NOT OPENED YET"
                 return False
             else:
                 if stage.get(u"closing_time", False):
-                    if now > datetime_to_float(stage.get(u"closing_time")):
+                    if now > stage.get(u"closing_time"):
                         print u"ALREADY CLOSED"
                         return False
                     else:
@@ -896,6 +876,19 @@ def retrieve_my_predictions(user):
 # ################################
 # Part - WorldCup
 # ################################
+
+def get_worldcup_winner():
+        cursor, con = connect()
+        query = u"SELECT * FROM worldcup"
+        cursor.execute(query)
+
+        winner = cursor.fetchone()
+        result = {
+            u"winner_id": winner[0],
+            u"opening_time": datetime_to_float(winner[1]),
+            u"closing_time": datetime_to_float(winner[2])
+        }
+        return result
 
 
 def post_winner_wc(winner):
