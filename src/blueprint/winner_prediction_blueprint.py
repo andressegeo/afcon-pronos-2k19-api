@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, request, abort
 from google.appengine.api import users
+import json
 
 import src.requests as req
 from .blueprint_utils import flask_construct_response
@@ -45,34 +46,32 @@ def get_all_prediction(user_id):
 As her name indicates, this method allow to post by user the winner prediction of the worldcup 2k18
 """
 
-"""
+
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
-    winner = request.get_json().get(u'winner', None)
+    winner = json.loads(request.data).get(u'winner', None)
     items = req.addWinner(winner)
     return flask_construct_response({u'items': items})
+
+
 """
-
-
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
-    try:
-        win = json.loads(request.data)
-        check = req.addWinner(win)
-        #print check
-        
-        print check
-        if check == 1:
-            return flask_construct_response({u'response':'Insert successfull'})
-        elif check == 0:
-            return flask_construct_response({u'response':'Error during insertion'})
-        elif check == 2:
-            return flask_construct_response({u'response':'You have not right to update the prediction'})
-        else:
-            return flask_construct_response({u'response':'Nothing' })
-    except BaseException, e:
-        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
-        return "Error"
+
+    # win = json.loads(request.data)
+    check = req.addWinner(win)
+    #print check
+
+    print check
+    if check == 1:
+        return flask_construct_response({u'response':'Insert successfull'})
+    elif check == 0:
+        return flask_construct_response({u'response':'Error during insertion'})
+    elif check == 2:
+        return flask_construct_response({u'response':'You have not right to update the prediction'})
+    else:
+        return flask_construct_response({u'response':'Nothing' })
+"""
 
 
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/winner_is', methods=[u'POST'])

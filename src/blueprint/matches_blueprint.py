@@ -73,13 +73,13 @@ def scoring_one_match(id):
 
         print check
         if check == 1:
-            return flask_construct_response({u'response':'Insert successfull'})
+            return flask_construct_response({u'response': 'Insert successfull'})
         elif check == 0:
-            return flask_construct_response({u'response':'Error during insertion'})
+            return flask_construct_response({u'response': 'Error during insertion'})
         elif check == 2:
-            return flask_construct_response({u'response':'You have not right to update the prediction'})
+            return flask_construct_response({u'response': 'You have not right to update the prediction'})
         else:
-            return flask_construct_response({u'response':'Nothing' })
+            return flask_construct_response({u'response': 'Nothing'})
     except BaseException, e:
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return "Error"

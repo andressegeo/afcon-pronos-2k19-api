@@ -7,6 +7,7 @@ import MySQLdb
 import logging
 
 from google.appengine.api import users
+import json
 
 from config import CONFIG
 
@@ -525,14 +526,17 @@ def addWinner(winner):
     if not winner:
         winner_id = u"NULL"
     else:
-        winner_id = winner.get(u'id')
+        winner_id = winner
 
     user = get_current_user()
 
     cursor, con = connect()
+
     query = u"UPDATE users SET worldcup_winner = {} WHERE id = {}".format(winner_id, user.get(u"id"))
+    print query
     cursor.execute(query)
     con.commit()
+    return winner_id
 
 
 def retrieve_my_winner(user):
@@ -599,7 +603,7 @@ def predict(prediction):
         insert_new_prediction(prediction)
     return get_prediction(prediction)
 
-
+"""
 def predictMatch(prediction):
     items = []
     try:
@@ -627,7 +631,7 @@ def predictMatch(prediction):
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
     return items
-
+"""
 
 def get_user_and_predictions(user_email):
     #  user = get_user_connect()
@@ -741,7 +745,7 @@ def post_winner_wc(winner):
     except TypeError as e:
         print(e)
 
-
+"""
 def addWinner(win):
     win = win["worldcup_winner"]
     user = users.get_current_user()
@@ -778,7 +782,7 @@ def addWinner(win):
     else:
         print "prohibido"
         return 2
-
+"""
 
 if __name__ == '__main__':
     pass
