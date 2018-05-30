@@ -410,7 +410,7 @@ def addWinner(win):
     print present
     if present < last:
         print "true"
-        print "U can modify prediction but, des pts en moins"
+        print "Vous avez modifiez avant la date de cloture de phase de poules"
         try:
             cursor, con = connect()
             cursor.execute("UPDATE users SET worldcup_winner ="+str(win)+" where email = '"+str(email)+"'")
@@ -421,8 +421,7 @@ def addWinner(win):
             return 0
 
     elif last < present < end_last:
-        print "false"
-        print "U can't modify prediction, it's close"
+        print "Vous avez modifié durant la phase d'entre 2 tours, vous aurez des points en moins "
         try:
             cursor, con = connect()
             cursor.execute("UPDATE users SET worldcup_winner ="+str(win)+", has_modified_worldcup_winner = 1 where email = '"+str(email)+"'")
