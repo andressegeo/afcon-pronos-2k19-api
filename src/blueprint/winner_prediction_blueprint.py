@@ -86,12 +86,3 @@ def add_winner():
         return flask_construct_response({u'response':'Nothing' })
 
 
-
-@WINNER_PREDICTION_API_BLUEPRINT.route(u'/winner_is', methods=[u'POST'])
-def post_winner():
-    if not users.is_current_user_admin():
-        abort(403)
-
-    winner = request.get_json().get(u'winner')
-    items = req.post_winner_wc(winner)
-    return flask_construct_response({u'items': items})

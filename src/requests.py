@@ -33,9 +33,6 @@ def connect():
 # ################################
 
 
-def getAllMatches():
-    pass
-
 
 def infos_team(team_id):
     items = []
@@ -787,10 +784,10 @@ def getPredictionWinner():
         cursor, con = connect()
         cursor.execute(u"SELECT worldcup_winner FROM users where email ='{}'".format(user))
         for row in cursor.fetchall():
-            winner = getTeam(str(row[0]))
+            #winner = getTeam(str(row[0]))
             tab.append({
                 u'user': user,
-                u'winner_prediction': winner
+                u'winner_prediction': row[0]
             })
         return tab
     except BaseException, e:
@@ -822,12 +819,20 @@ def retrieve_my_predictions(user):
 # Part - WorldCup
 # ################################
 
-
 def post_winner_wc(winner):
     try:
+        print winner
         cursor, con = connect()
-        cursor.execute("UPDATE worldcup SET winner=" + str(winner.get(u'id')))
-        con.commit()
+        cursor.execute("SELECT * FROM worldcup")
+        if cursor.fetchone():
+            print "labas"
+            cursor.execute("UPDATE worldcup SET winner=" + str(winner['winner']))
+            con.commit()
+        else:
+            print "here"
+            req = "INSERT into worldcup(winner) VALUES (%s)"
+            cursor.execute(req, [winner[u"winner"]])
+            con.commit()
     except TypeError as e:
         print(e)
 
