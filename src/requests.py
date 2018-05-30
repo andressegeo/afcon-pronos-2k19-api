@@ -4,8 +4,10 @@
 
 import MySQLdb
 import logging
+import time
 from datetime import datetime
 
+from flask import abort
 from google.appengine.api import users
 
 from config import CONFIG
@@ -33,17 +35,16 @@ def connect():
 # ################################
 
 
-def getAllMatches():
-    pass
-
-
 def infos_team(team_id):
+    if not team_id:
+        team_id = u"null"
+
     items = []
     try:
         cursor, con = connect()
         cursor.execute("SELECT * FROM teams where id = " + str(team_id) + "")
         for row in cursor.fetchall():
-            print(row)
+            # print(row)
             items.append({
                 u'id': row[0],
                 u'name': row[1],
@@ -55,7 +56,6 @@ def infos_team(team_id):
 
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
-
     return items
 
 
@@ -77,7 +77,6 @@ def infos_stadium(stadium_id):
 
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
-
     return items
 
 
@@ -92,7 +91,6 @@ def construct_matches(stages_id):
         cursor, con = connect()
         cursor.execute("SELECT * FROM matches where stages_id = " + str(stages_id) + "")
         for row in cursor.fetchall():
-            print(row)
             items.append({
                 u'id': row[0],
                 u'stages_id': row[1],
@@ -129,7 +127,6 @@ def getAllMatches():
 
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
-
     return items
 
 
@@ -189,26 +186,15 @@ def scoringMatch(match_id, result):
     items = []
     try:
         cursor, con = connect()
-        cursor.execute("UPDATE matches SET score=%s, winner=%s WHERE id=%s",
-                       (result.get(u'score'),
-                        result.get(u'winner'),
-                        match_id
-                        ))
+        query = u"UPDATE matches SET score={}, winner={} WHERE id={}".format(result.get(u'score'), result.get(
+            u'winner'), match_id)
+
+        print query
+
+        cursor.execute(query)
         con.commit()
+
         return 1
-    except BaseException, e:
-        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
-        return 0
-
-
-def get_user_id(email):
-    try:
-        cursor, con = connect()
-        cursor.execute("SELECT id FROM users where email ='" + email + "'")
-        for row in cursor.fetchall():
-            id_user = row[0]
-            print id_user
-        return id_user
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
         return 0
@@ -235,6 +221,43 @@ def predictMatch(id, predict):
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return 0
 
+
+def get_match(match_id):
+    cursor, con = connect()
+    query = u"SELECT * FROM matches m join stages s on m.stages_id=s.id where m.id = {}".format(match_id)
+    cursor.execute(query)
+    my_match = cursor.fetchone()
+    if my_match:
+        stage = {
+            u"id": my_match[10],
+            u"name": my_match[11],
+            u"opening_time": my_match[12],
+            u"closing_time": my_match[13],
+        }
+        return {
+            u"id": my_match[0],
+            u"stages_id": my_match[1],
+            u"match_time": my_match[2],
+            u"team_1": my_match[3],
+            u"team_2": my_match[4],
+            u"placeholder_1": my_match[5],
+            u"placeholder_2": my_match[6],
+            u"stadiums_id": my_match[7],
+            u"score": my_match[8],
+            u"winner": my_match[9],
+            u"stage": stage
+        }
+    else:
+        return None
+
+
+def is_match_played_today(match_id):
+    match = get_match(match_id)
+    if datetime.datetime.fromtimestamp(match.get(u"match_time")).strftime(u'%Y-%m-%d %H:%M:%S').date() == \
+            datetime.today().date():
+        return True
+    else:
+        return False
 
 """
 def scoringMatch(id, predict):
@@ -552,6 +575,19 @@ def insert_new_user(user):
         print(e)
 
 
+def get_user_id(email):
+    try:
+        cursor, con = connect()
+        cursor.execute("SELECT id FROM users where email ='" + email + "'")
+        for row in cursor.fetchall():
+            id_user = row[0]
+            print id_user
+        return id_user
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
+
+
 """
 def addWinner(winner):
     if not winner:
@@ -668,24 +704,63 @@ def insert_new_prediction(prediction):
 def predict(match_id, prediction):
     user = get_current_user()
 
-    new_prediction = {
-        u"id": None,
-        u"matches_id": match_id,
-        u"score": prediction.get(u"score"),
-        u"winner": prediction.get(u"winner"),
-        u"users_id": user.get(u"id")
-    }
+    if prediction_allowed(match_id):
+        new_prediction = {
+            u"id": None,
+            u"matches_id": match_id,
+            u"score": prediction.get(u"score"),
+            u"winner": prediction.get(u"winner"),
+            u"users_id": user.get(u"id")
+        }
 
-    db_prediction = get_prediction(new_prediction)
+        db_prediction = get_prediction(new_prediction)
 
-    # if prediction already in db
-    if db_prediction:
-        new_prediction[u"id"] = db_prediction.get(u"id")
-        my_prediction = update_prediction(new_prediction)
+        # if prediction already in db
+        if db_prediction:
+            new_prediction[u"id"] = db_prediction.get(u"id")
+            my_prediction = update_prediction(new_prediction)
+        else:
+            my_prediction = insert_new_prediction(new_prediction)
+
+        return my_prediction
     else:
-        my_prediction = insert_new_prediction(new_prediction)
+        abort(403)
 
-    return my_prediction
+
+def datetime_to_float(d):
+    epoch = datetime.utcfromtimestamp(0)
+    total_seconds = (d - epoch).total_seconds()
+    # total_seconds will be in decimals (millisecond precision)
+    return total_seconds
+
+
+def prediction_allowed(match_id):
+    if CONFIG[u"app"].get(u"debug"):
+        return True
+    else:
+        now = time.time()
+        match = get_match(match_id)
+        print u"MY MATCH "+unicode(match)
+        if match:
+            stage = match.get(u"stage")
+            if now < datetime_to_float(stage.get(u"opening_time")):
+                print u"NOT OPENED YET"
+                return False
+            else:
+                if stage.get(u"closing_time", False):
+                    if now > datetime_to_float(stage.get(u"closing_time")):
+                        print u"ALREADY CLOSED"
+                        return False
+                    else:
+                        return True
+                else:
+                    if is_match_played_today(match_id):
+                        return False
+                    else:
+                        return True
+        else:
+            return False
+
 
 
 """
