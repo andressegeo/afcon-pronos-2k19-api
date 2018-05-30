@@ -13,16 +13,29 @@ WINNER_PREDICTION_API_BLUEPRINT = Blueprint(u'winner_prediction_api', __name__)
 As her name indicates, this method allow to get the winner prediction according by user
 """
 
-
+"""
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/<int:user_id>', methods=[u'GET'])
 def get_prediction_winner(user_id):
     items = req.getPredictionWinner(user_id)
     return flask_construct_response({u'items': items})
 
+"""
+"""
+As her name indicates, this method allow to get the winner prediction according by user
+"""
+@WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'GET'])
+def get_prediction_winner():
+    items = req.getPredictionWinner()
+    print items
+    if items == 0:   
+        return flask_construct_response({u'response':"Vous n'avez pas encore saisi votre prediction"})
+    else:
+        return flask_construct_response({u'items':items})
 
 """
 As her name indicates, this method allow to get one prediction define by user
 """
+
 
 
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/<int:id>', methods=[u'GET'])
