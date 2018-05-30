@@ -37,6 +37,7 @@ def connect():
 def getAllMatches():
     pass
 
+
 def infos_team(team_id):
     items = []
     try:
@@ -117,7 +118,6 @@ def getAllMatches():
         cursor, con = connect()
         cursor.execute("SELECT * FROM stages")
         for row in cursor.fetchall():
-            print(row)
             items.append({
                 u'id': row[0],
                 u'name': row[1],
@@ -235,29 +235,6 @@ def predictMatch(id, predict):
         return 0
 
 
-def scoringMatch(id, predict):
-    matches_id = id
-    print u"id is: {}".format(unicode(id).encode(u'utf-8'))
-    score = predict["score"]
-    winner = predict["winner"]
-    print u"winner is: {}".format(winner)
-    user = users.get_current_user()
-    email = user.email()
-    print email
-    users_id = get_user_id(email)
-
-    try:
-        cursor, con = connect()
-        req = "INSERT INTO predictions(matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)"
-        cursor.execute(req, [matches_id, score, winner, users_id])
-        con.commit()
-        return 1
-    except BaseException, e:
-        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
-        return 0
-
-
-
 def getFixture(id):
     print "here"
     fixture = []
@@ -283,6 +260,33 @@ def getFixture(id):
 # ################################
 # Part - Ranking
 # ################################
+
+def Ranking():
+    items = []
+    cursor, con = connect()
+    query = u"SELECT * from users u left outer join teams t on u.worldcup_winner=t.id order by u.points, u.email"
+    cursor.execute(query)
+    for row in cursor.fetchall():
+        team = {
+            u"id": row[8],
+            u"name": row[9],
+            u"iso2": row[10],
+            u"flag_url": row[11],
+            u"eliminated": row[12],
+        }
+        user = {
+            u"id": row[0],
+            u"email": row[1],
+            u"name": row[2],
+            u"entity": row[3],
+            u"picture_url": row[4],
+            u"worldcup_winner": team,
+            u"points": row[6],
+            u"is_admin": row[7],
+            u"predictions": []
+        }
+        items.append(user)
+    return items
 
 # ################################
 # Part - Stadiums
@@ -405,20 +409,20 @@ def get_user(user):
     user_obj = {}
     cursor, con = connect()
     query = u"SELECT * FROM users where email ='{}'".format(user.email())
+
     cursor.execute(query)
     user_db = cursor.fetchone()
-    for property in user_db:
-        user_obj[u"id"] = property
-        user_obj[u"email"] = property
-        user_obj[u"name"] = property
-        user_obj[u"entity"] = property
-        user_obj[u"picture_url"] = property
-        user_obj[u"worldcup_winner"] = property
-        user_obj[u"points"] = property
-        user_obj[u"is_admin"] = property
+    if user_db:
+        user_obj[u"id"] = user_db[0]
+        user_obj[u"email"] = user_db[1]
+        user_obj[u"name"] = user_db[2]
+        user_obj[u"entity"] = user_db[3]
+        user_obj[u"picture_url"] = user_db[4]
+        user_obj[u"worldcup_winner"] = user_db[5]
+        user_obj[u"points"] = user_db[6]
+        user_obj[u"is_admin"] = user_db[7]
 
     user_obj = retrieve_my_winner(user_obj)
-
     return user_obj
 
 
@@ -539,6 +543,7 @@ def addWinner(winner):
     return winner_id
 """
 
+
 def retrieve_my_winner(user):
     if user.get(u"worldcup_winner"):
         cursor, con = connect()
@@ -547,14 +552,16 @@ def retrieve_my_winner(user):
 
         team = cursor.fetchone()
 
-        my_favorite_team = {
-            u"id": team[0],
-            u"name": team[1],
-            u"iso2": team[2],
-            u"flag_url": team[3],
-            u"eliminated": team[4]
-        }
-
+        if team:
+            my_favorite_team = {
+                u"id": team[0],
+                u"name": team[1],
+                u"iso2": team[2],
+                u"flag_url": team[3],
+                u"eliminated": team[4]
+            }
+        else:
+            my_favorite_team = None
         user[u"worldcup_winner"] = my_favorite_team
 
     return user
@@ -567,10 +574,24 @@ def retrieve_my_winner(user):
 
 def get_prediction(prediction):
     cursor, con = connect()
-    query = u"SELECT * FROM predictions where matches_id={} AND users_id={}".format(prediction.get(u'matches_id'),
-                                                                                    prediction.get(u'users_id'))
-    cursor.execute(query)
-    return cursor.fetchone()
+
+    if prediction.get(u'matches_id', False) and prediction.get(u'users_id', False):
+
+        query = u"SELECT * FROM predictions where matches_id={} AND users_id={}".format(prediction.get(u'matches_id'),
+                                                                                        prediction.get(u'users_id'))
+        cursor.execute(query)
+        db_prediction = cursor.fetchone()
+        if db_prediction:
+            return {
+                u"id": db_prediction[0],
+                u"matches_id": db_prediction[1],
+                u"score": db_prediction[2],
+                u"winner": db_prediction[3],
+                u"users_id": db_prediction[4]
+            }
+
+    #else if not data or not enough args to search return the given prediction (funct arg)
+    return None
 
 
 def update_prediction(prediction):
@@ -578,30 +599,48 @@ def update_prediction(prediction):
     query = u"UPDATE predictions SET score={}, winner={} WHERE id={}".format(prediction.get(u'score'),
                                                                              prediction.get(u'winner'),
                                                                              prediction.get(u'id'))
-    con.commit()
     cursor.execute(query)
+    con.commit()
     return get_prediction(prediction)
 
 
 def insert_new_prediction(prediction):
     cursor, con = connect()
-    query = u"INSERT INTO predictions (matches_id, score, winner, users_id) VALUES ({}, {}, {}, {})".format(
+    query = u"INSERT INTO predictions (matches_id, score, winner, users_id) VALUES ({}, '{}', {}, {})".format(
         prediction.get(u'matches_id'),
         prediction.get(u'score'),
         prediction.get(u'winner'),
         prediction.get(u'users_id')
     )
+    print u"QUERY " + query
+
     cursor.execute(query)
     con.commit()
     return get_prediction(prediction)
 
 
-def predict(prediction):
-    if get_prediction(prediction):
-        update_prediction(prediction)
+def predict(match_id, prediction):
+
+    user = get_current_user()
+
+    new_prediction = {
+        u"id": None,
+        u"matches_id": match_id,
+        u"score": prediction.get(u"score"),
+        u"winner": prediction.get(u"winner"),
+        u"users_id": user.get(u"id")
+    }
+
+    db_prediction = get_prediction(new_prediction)
+
+    # if prediction already in db
+    if db_prediction:
+        new_prediction[u"id"] = db_prediction.get(u"id")
+        my_prediction = update_prediction(new_prediction)
     else:
-        insert_new_prediction(prediction)
-    return get_prediction(prediction)
+        my_prediction = insert_new_prediction(new_prediction)
+
+    return my_prediction
 
 """
 def predictMatch(prediction):
