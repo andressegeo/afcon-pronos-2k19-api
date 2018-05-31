@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS `worldcup_2018`.`users` (
   `picture_url` VARCHAR(255) NULL,
   `worldcup_winner` INT NULL,
   `points` INT NOT NULL DEFAULT 0,
+  `has_modified_worldcup_winner` TINYINT(1) NULL DEFAULT 0,
   `is_admin` TINYINT(1) NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   INDEX `fk_users_teams_idx` (`worldcup_winner` ASC),

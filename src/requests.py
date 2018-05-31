@@ -555,7 +555,7 @@ def insert_new_user(user):
     user_entity = user.email().split(u"@")[1]
     user_nickname = user.nickname()
     user_admin = users.is_current_user_admin()
-
+    print user_admin
     try:
         cursor, con = connect()
         query = u"INSERT INTO users (email, entity, name, is_admin) VALUES ('{}', '{}', '{}', {})".format(user_email,
