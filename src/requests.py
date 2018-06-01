@@ -561,8 +561,7 @@ def insert_new_user(user):
         query = u"INSERT INTO users (email, entity, name, is_admin) VALUES ('{}', '{}', '{}', {})".format(user_email,
                                                                                                           user_entity,
                                                                                                           user_nickname,
-                                                                                                          int(
-                                                                                                              user_admin))
+                                                                                                          user_admin)
         cursor.execute(query)
 
         con.commit()
@@ -679,29 +678,33 @@ def insert_new_prediction(prediction):
 
 
 def predict(match_id, prediction):
-    user = get_current_user()
+    try:
+        user = get_current_user()
+        print prediction
+        if prediction_allowed(match_id):
+            new_prediction = {
+                u"id": None,
+                u"matches_id": match_id,
+                u"score": prediction.get(u"score"),
+                u"winner": prediction.get(u"winner"),
+                u"users_id": user.get(u"id")
+            }
 
-    if prediction_allowed(match_id):
-        new_prediction = {
-            u"id": None,
-            u"matches_id": match_id,
-            u"score": prediction.get(u"score"),
-            u"winner": prediction.get(u"winner"),
-            u"users_id": user.get(u"id")
-        }
+            db_prediction = get_prediction(new_prediction)
 
-        db_prediction = get_prediction(new_prediction)
+            # if prediction already in db
+            if db_prediction:
+                new_prediction[u"id"] = db_prediction.get(u"id")
+                my_prediction = update_prediction(new_prediction)
+            else:
+                my_prediction = insert_new_prediction(new_prediction)
 
-        # if prediction already in db
-        if db_prediction:
-            new_prediction[u"id"] = db_prediction.get(u"id")
-            my_prediction = update_prediction(new_prediction)
+            return my_prediction
         else:
-            my_prediction = insert_new_prediction(new_prediction)
+            abort(403)
+    except BaseException, e:
+        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
 
-        return my_prediction
-    else:
-        abort(403)
 
 
 def datetime_to_float(d):
@@ -794,7 +797,7 @@ def get_user_and_predictions(user_email):
                     u'picture_url': row[4],
                     u'worldcup_winner': row[5],
                     u'points': row[6],
-                    u'is_admin': row[7],
+                    u'is_admin': row[3],
                 })
             id = str(me[0]["id"])
             table.append({u'Me': me})
@@ -945,6 +948,154 @@ def addWinner(win):
     else:
         print "prohibido"
         return 2
+
+def check_stages(match_id):
+    
+    try:
+        cursor, con = connect()
+        query = u"SELECT stages_id FROM matches where id ='{}'".format(match_id)
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result:
+            stages_id = result[0]
+            return stages_id
+        else:
+            return 99
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 100
+
+
+def get_user_points(user_id):
+    
+    try: 
+        cursor, con = connect()
+        query = u"SELECT points FROM users where id ='{}'".format(user_id)
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result:
+            points = result[0]
+            return points
+        else:
+            return 109
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 209
+        
+
+def update_score(match_id, predict):
+    stages_id = check_stages(match_id)
+    print "nous somme à la phase: {}".format(stages_id)
+    score_final = predict.get(u'score')
+    print "score final: {}".format(score_final)
+    winner_final = predict.get(u'winner')
+    print "winner final: {}".format(winner_final)
+    if stages_id < 9:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM predictions where matches_id ='" + str(match_id) + "'")
+        for row in cursor.fetchall():
+            print row
+            users_id = row[4]
+            points = get_user_points(users_id)
+            print "score du user: {}".format(row[2])
+            print type(row[2])
+            if row[2] == score_final:
+                points = points + 3 
+            print "winner du user: {}".format(row[3])
+            print type(row[3])
+            if row[3] == winner_final:
+                points = points + 1 
+                 
+            print "points attribués au user: {}".format(points)
+        
+            try: 
+                cursor, con = connect()
+                query = u"UPDATE users SET points={} WHERE id={}".format(points, users_id)
+
+                print query
+
+                cursor.execute(query)
+                con.commit()
+                
+            except BaseException, e:
+                logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 1
+
+    elif 9 <= stages_id <=13:
+        cursor, con = connect()
+        cursor.execute("SELECT * FROM predictions where matches_id ='" + str(match_id) + "'")
+        for row in cursor.fetchall():
+            users_id = row[4]
+            points = get_user_points(users_id) 
+
+            if row[2] == score_final:
+                points = points + 3 
+            
+            if row[3] == winner_final:
+                points = points + 1 
+                
+            print points
+        
+            try: 
+                cursor, con = connect()
+                query = u"UPDATE users SET points={} WHERE id={}".format(points, users_id)
+
+                print query
+
+                cursor.execute(query)
+                con.commit()
+                
+            except BaseException, e:
+                logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 1
+ 
+    
+    else:
+        return 2
+
+def update_point_final(winner):
+    win = winner['winner']
+    print win
+    try: 
+        cursor, con = connect()
+        query = u"SELECT id, worldcup_winner, points, has_modified_worldcup_winner FROM users"
+        cursor.execute(query)
+        for row in cursor.fetchall():
+            print row
+            print "Mon winner est: {}".format(row[1])
+            print "modifier?: {}".format(row[3])
+            print "point avant upfate?: {}".format(row[2])
+            if row[1] == win and row[3] == 0:
+                points = row[2] + 15
+                print "points du winner non update: {}".format(points)
+                cursor, con = connect()
+                query = u"UPDATE users SET points={} WHERE id={}".format(points, row[0])
+
+                print query
+
+                cursor.execute(query)
+                con.commit()
+                rslt = 1
+            elif row[1] == win and row[3] == 1:
+                points = row[2] + 10
+                print "points du winner Update: {}".format(points)
+                cursor, con = connect()
+                query = u"UPDATE users SET points={} WHERE id={}".format(points, row[0])
+
+                print query
+
+                cursor.execute(query)
+                con.commit()
+                rslt = 1
+            else:
+                pass
+
+        return rslt
+    except BaseException, e:
+        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
+        return 0
+
+
 
 
 if __name__ == '__main__':

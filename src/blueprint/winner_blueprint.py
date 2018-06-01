@@ -28,4 +28,11 @@ def post_winner():
 
     winner = json.loads(request.data)
     items = req.post_winner_wc(winner)
-    return flask_construct_response({u'items': items})
+    check = req.update_point_final(winner)
+    print "check: {}".format(check)
+
+    if check == 1:
+        return flask_construct_response({u'response': 'Update points and score successfull'})
+    else:
+        return flask_construct_response({u'response': 'Error during update points'})
+
