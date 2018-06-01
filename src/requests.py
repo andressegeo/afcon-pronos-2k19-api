@@ -183,11 +183,14 @@ def scoringMatch(match_id, result):
     rslt =  result.get(u'score')
     print "le result est: {}".format(rslt)
     print type(rslt)
+    pred = result.get(u'winner')
+    if pred is None:
+        pred = "NULL"
+    print "my pred: {}".format(pred)
     try:
         print type(rslt)
         cursor, con = connect()
-        query = u"UPDATE matches SET score='{}', winner={} WHERE id={}".format(str(result.get(u'score')), result.get(
-            u'winner'), match_id)
+        query = u"UPDATE matches SET score='{}', winner={} WHERE id={}".format(str(result.get(u'score')), pred, match_id)
 
         print query
 
@@ -657,27 +660,37 @@ def get_prediction(prediction):
 
 
 def update_prediction(prediction):
+    pred = prediction.get(u'winner')
+    if pred is None:
+        pred = "NULL"
+    print "my pred: {}".format(pred)
     cursor, con = connect()
-    query = u"UPDATE predictions SET score={}, winner={} WHERE id={}".format(prediction.get(u'score'),
-                                                                             prediction.get(u'winner'),
-                                                                             prediction.get(u'id'))
+    query = u"UPDATE predictions SET score='{}', winner={} WHERE id={}".format(prediction.get(u'score'),
+                                                                            pred,
+                                                                            prediction.get(u'id'))
     cursor.execute(query)
     con.commit()
     return get_prediction(prediction)
 
 
 def insert_new_prediction(prediction):
+    pred = prediction.get(u'winner')
+    if pred is None:
+        pred = "NULL"
+
+    print "my pred: {}".format(pred)
     cursor, con = connect()
     query = u"INSERT INTO predictions (matches_id, score, winner, users_id) VALUES ({}, '{}', {}, {})".format(
         prediction.get(u'matches_id'),
         prediction.get(u'score'),
-        prediction.get(u'winner'),
+        pred,
         prediction.get(u'users_id')
     )
     print u"QUERY " + query
 
     cursor.execute(query)
     con.commit()
+    
     return get_prediction(prediction)
 
 
@@ -685,6 +698,7 @@ def predict(match_id, prediction):
     try:
         user = get_current_user()
         print prediction
+        print prediction.get(u"winner")
         if prediction_allowed(match_id):
             new_prediction = {
                 u"id": None,
@@ -695,19 +709,21 @@ def predict(match_id, prediction):
             }
 
             db_prediction = get_prediction(new_prediction)
-
+            
             # if prediction already in db
             if db_prediction:
+                print "q"
                 new_prediction[u"id"] = db_prediction.get(u"id")
                 my_prediction = update_prediction(new_prediction)
             else:
+                print "z"
                 my_prediction = insert_new_prediction(new_prediction)
 
             return my_prediction
         else:
             abort(403)
     except BaseException, e:
-        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
+        logging.error(u'Failed: {}'.format(unicode(e).encode(u'utf-8')))
 
 
 
@@ -1033,16 +1049,22 @@ def update_score(match_id, predict):
         cursor, con = connect()
         cursor.execute("SELECT * FROM predictions where matches_id ='" + str(match_id) + "'")
         for row in cursor.fetchall():
+            print row
             users_id = row[4]
-            points = get_user_points(users_id) 
-
+            points = get_user_points(users_id)
+            print "score du user: {}".format(row[2])
             if row[2] == score_final:
                 points = points + 3 
-            
-            if row[3] == winner_final:
+            print "winner du user: {}".format(row[3])
+            if row[3] is None and winner_final == "NULL":
+                print "here null"
                 points = points + 1 
-                
-            print points
+            elif row[3] == winner_final:
+                points = points + 1 
+            else:
+                pass
+                 
+            print "points total attribués au user: {}".format(points)
         
             try: 
                 cursor, con = connect()

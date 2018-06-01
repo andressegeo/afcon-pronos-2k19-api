@@ -24,7 +24,6 @@ def get_all_matches():
 def predict_one_match(id):
     print id
     predict = json.loads(request.data)
-    print predict
     my_predict = req.predict(id, predict)
     return flask_construct_response({u'items': my_predict})
 
