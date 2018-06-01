@@ -184,6 +184,7 @@ def scoringMatch(match_id, result):
     print "le result est: {}".format(rslt)
     print type(rslt)
     try:
+        print type(rslt)
         cursor, con = connect()
         query = u"UPDATE matches SET score='{}', winner={} WHERE id={}".format(str(result.get(u'score')), result.get(
             u'winner'), match_id)
@@ -790,6 +791,7 @@ def get_user_and_predictions(user_email):
         cursor, con = connect()
         cursor.execute(u"SELECT * FROM users where email ='{}'".format(user_email))
         user_db = cursor.fetchall()
+        print "select boolean is_admin on db {}".format(row[7])
         if len(user_db) > 0:
             for row in user_db:
                 me.append({
@@ -800,7 +802,7 @@ def get_user_and_predictions(user_email):
                     u'picture_url': row[4],
                     u'worldcup_winner': row[5],
                     u'points': row[6],
-                    u'is_admin': row[3],
+                    u'is_admin': row[7],
                 })
             id = str(me[0]["id"])
             table.append({u'Me': me})
@@ -1001,15 +1003,18 @@ def update_score(match_id, predict):
             users_id = row[4]
             points = get_user_points(users_id)
             print "score du user: {}".format(row[2])
-            print type(row[2])
             if row[2] == score_final:
                 points = points + 3 
             print "winner du user: {}".format(row[3])
-            print type(row[3])
-            if row[3] == winner_final:
+            if row[3] is None and winner_final == "NULL":
+                print "here null"
                 points = points + 1 
+            elif row[3] == winner_final:
+                points = points + 1 
+            else:
+                pass
                  
-            print "points attribués au user: {}".format(points)
+            print "points total attribués au user: {}".format(points)
         
             try: 
                 cursor, con = connect()
@@ -1093,7 +1098,7 @@ def update_point_final(winner):
                 con.commit()
                 rslt = 1
             else:
-                pass
+                rslt = 1
 
         return rslt
     except BaseException, e:
