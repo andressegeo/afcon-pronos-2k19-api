@@ -180,9 +180,12 @@ def get_stages_and_matches():
 
 def scoringMatch(match_id, result):
     items = []
+    rslt =  result.get(u'score')
+    print "le result est: {}".format(rslt)
+    print type(rslt)
     try:
         cursor, con = connect()
-        query = u"UPDATE matches SET score={}, winner={} WHERE id={}".format(result.get(u'score'), result.get(
+        query = u"UPDATE matches SET score='{}', winner={} WHERE id={}".format(str(result.get(u'score')), result.get(
             u'winner'), match_id)
 
         print query
@@ -1052,7 +1055,9 @@ def update_score(match_id, predict):
     
     else:
         return 2
-
+"""
+    Update users points when admin enter final winner of the worldcup at the end of tournament.
+"""
 def update_point_final(winner):
     win = winner['winner']
     print win
