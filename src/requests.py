@@ -591,8 +591,9 @@ def get_user_id(email):
         return 0
 
 
-"""
+
 def addWinner(winner):
+    print winner
     if not winner:
         winner_id = u"NULL"
     else:
@@ -607,7 +608,7 @@ def addWinner(winner):
     cursor.execute(query)
     con.commit()
     return winner_id
-"""
+
 
 
 def retrieve_my_winner(user):
@@ -934,7 +935,7 @@ def post_winner_wc(winner):
     except TypeError as e:
         print(e)
 
-
+"""
 def addWinner(win):
     win = win["worldcup_winner"]
     user = users.get_current_user()
@@ -970,7 +971,7 @@ def addWinner(win):
     else:
         print "prohibido"
         return 2
-
+"""
 def check_stages(match_id):
     
     try:

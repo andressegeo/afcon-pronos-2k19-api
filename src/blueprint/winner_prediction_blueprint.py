@@ -56,15 +56,15 @@ def get_all_prediction(user_id):
 As her name indicates, this method allow to post by user the winner prediction of the worldcup 2k18
 """
 
-"""
+
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
-    winner = json.loads(request.data).get(u'winner', None)
+    winner = json.loads(request.data).get(u'worldcup_winner', None)
     items = req.addWinner(winner)
-    return flask_construct_response({u'items': items})
+    return flask_construct_response({u'worldcup_winner': items})
+
+
 """
-
-
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
 
@@ -82,4 +82,4 @@ def add_winner():
     else:
         return flask_construct_response({u'response':'Nothing' })
 
-
+"""
