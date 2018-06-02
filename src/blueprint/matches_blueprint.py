@@ -25,7 +25,7 @@ def predict_one_match(id):
     print id
     predict = json.loads(request.data)
     my_predict = req.predict(id, predict)
-    return flask_construct_response({u'items': my_predict})
+    return flask_construct_response(my_predict)
 
 """
 As her name indicates, this method allow to send the current user prediction for this game
@@ -78,7 +78,7 @@ def scoring_one_match(id):
         print result
         check = req.scoringMatch(id, predict)
         print check
-
+#A revoir
         if result == 1 and check == 1:
             return flask_construct_response({u'response': 'Update points and score successfull'})
         elif result == 0 or check == 0:

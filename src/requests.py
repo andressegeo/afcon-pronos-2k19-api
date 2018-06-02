@@ -50,7 +50,7 @@ def infos_team(team_id):
                 u'name': row[1],
                 u'iso2': row[2],
                 u'flag_url': row[3],
-                u'eliminated': 'false' if row[4] == 0 else 'true'
+                u'eliminated': False if row[4] == 0 else True
             })
         con.commit()
 
@@ -315,7 +315,7 @@ def getFixture(id):
 def Ranking():
     items = []
     cursor, con = connect()
-    query = u"SELECT * from users u left outer join teams t on u.worldcup_winner=t.id order by u.points, u.email"
+    query = u"SELECT * from users u left outer join teams t on u.worldcup_winner=t.id order by u.points desc, u.email "
     cursor.execute(query)
     for row in cursor.fetchall():
         team = {
@@ -323,7 +323,7 @@ def Ranking():
             u"name": row[9],
             u"iso2": row[10],
             u"flag_url": row[11],
-            u"eliminated": row[12],
+            u"eliminated": False if row[12] == 0 else True,
         }
         user = {
             u"id": row[0],
@@ -333,7 +333,7 @@ def Ranking():
             u"picture_url": row[4],
             u"worldcup_winner": team,
             u"points": row[6],
-            u"is_admin": row[7],
+            u"is_admin": False if row[7] == 0 else True,
             u"predictions": []
         }
         items.append(user)
@@ -381,7 +381,7 @@ def getAllTeams():
                 u'name': row[1],
                 u'iso2': row[2],
                 u'flag_url': row[3],
-                u'eliminated': 'false' if row[4] == 0 else 'true'
+                u'eliminated': False if row[4] == 0 else True
             })
         con.commit()
         return items
@@ -472,7 +472,8 @@ def get_user(user):
         user_obj[u"picture_url"] = user_db[4]
         user_obj[u"worldcup_winner"] = user_db[5]
         user_obj[u"points"] = user_db[6]
-        user_obj[u"is_admin"] = user_db[7]
+        user_obj[u"has_modified_worldcup_winner"] = False if user_db[7] == 0 else True
+        user_obj[u"is_admin"] = False if user_db[8] == 0 else True
 
     user_obj = retrieve_my_winner(user_obj)
     return user_obj
@@ -623,7 +624,7 @@ def retrieve_my_winner(user):
                 u"name": team[1],
                 u"iso2": team[2],
                 u"flag_url": team[3],
-                u"eliminated": team[4]
+                u"eliminated": False if team[4] == 0 else True
             }
         else:
             my_favorite_team = None
@@ -871,7 +872,7 @@ def getPredictionWinner():
                 u'user': user,
                 u'winner_prediction': row[0]
             })
-        return tab
+        return tab[0]
     except BaseException, e:
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return 0

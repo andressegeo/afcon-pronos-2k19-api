@@ -25,12 +25,9 @@ As her name indicates, this method allow to get the winner prediction according 
 """
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_prediction_winner():
-    items = req.getPredictionWinner()
-    print items
-    if items == 0:   
-        return flask_construct_response({u'response':"Vous n'avez pas encore saisi votre prediction"})
-    else:
-        return flask_construct_response({u'items':items})
+    prediction_winner = req.getPredictionWinner()
+    print prediction_winner  
+    return flask_construct_response(prediction_winner)
 
 """
 As her name indicates, this method allow to get one prediction define by user
@@ -74,7 +71,7 @@ def add_winner():
     win = json.loads(request.data)
     check = req.addWinner(win)
     #print check
-
+    #A revoir, renvoyer ce que l'user à send en bd
     print check
     if check == 1:
         return flask_construct_response({u'response':'Insert successfull'})
