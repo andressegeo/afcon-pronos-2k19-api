@@ -1,12 +1,12 @@
-# AFCON 2K19 Pronos
+# AFCON 2K19 Pronos APi
 
 ## General
 - CdP: Andresse Njeungoue
 - dev: Andresse Njeungoue
-- Dossier Drive: 
+- Dossier Drive: https://drive.google.com/drive/u/0/folders/1Khcp_gIlSocjNAhD36Rxcoda5jYrnUsLgit 
 
 ## GCP
-- project: console_project_url
+- project: https://console.cloud.google.com/home/dashboard?project=pronos-can-2019
 - scope:
   - https://www.googleapis.com/auth/admin.directory.user.readonly
   - https://www.googleapis.com/auth/admin.directory.group.readonly
@@ -39,4 +39,3 @@ deactivate
 ```bash
 ./tasks/deploy.sh <dev|production|acceptance> <version>
 ```
-
