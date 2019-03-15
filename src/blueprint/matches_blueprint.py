@@ -16,13 +16,11 @@ As her name indicates, this method allow to retrieve the games open to predictio
 @MATCHES_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_all_matches():
     items = req.getAllMatches()
-    # print items
     return flask_construct_response({u'items': items})
 
 
 @MATCHES_API_BLUEPRINT.route(u'/<int:id>/predict', methods=[u'POST'])
 def predict_one_match(id):
-    print id
     predict = json.loads(request.data)
     my_predict = req.predict(id, predict)
     return flask_construct_response(my_predict)
@@ -38,7 +36,6 @@ def predict_one_match(id):
         predict = json.loads(request.data)
         check = req.predict(id, predict)
 
-        print check
         if check == 1:
             return flask_construct_response({u'response':'Insert successfull'})
         elif check == 0:
@@ -69,15 +66,14 @@ def scoring_one_match(match_id):
 @MATCHES_API_BLUEPRINT.route(u'/<int:id>/enter_score', methods=[u'POST'])
 def scoring_one_match(id):
 
-    if not users.is_current_user_admin():
-        abort(403)
+    # if not users.is_current_user_admin():
+    #     abort(403)
     predict = json.loads(request.data)
+    print predict
     try:
                 
         result = req.update_score(id, predict)
-        print result
         check = req.scoringMatch(id, predict)
-        print check
 #A revoir
         if result == 1 and check == 1:
             return flask_construct_response({u'response': 'Update points and score successfull'})

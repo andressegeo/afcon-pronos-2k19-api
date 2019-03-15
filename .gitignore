@@ -44,6 +44,7 @@ Thumbs.db
 # our custom DGTL rules
 *.pyc
 venv/
+env2/
 node_modules/
 lib/
 typings

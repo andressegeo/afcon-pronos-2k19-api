@@ -26,15 +26,11 @@ As her name indicates, this method allow to get the winner prediction according 
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_prediction_winner():
     prediction_winner = req.getPredictionWinner()
-    print prediction_winner  
     return flask_construct_response(prediction_winner)
 
 """
 As her name indicates, this method allow to get one prediction define by user
 """
-
-
-
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/<int:id>', methods=[u'GET'])
 def get_one_prediction(id):
     items = req.getOnePrediction()
@@ -44,9 +40,7 @@ def get_one_prediction(id):
 """
 As her name indicates, this method allow to get one prediction define by user
 """
-
-
-@WINNER_PREDICTION_API_BLUEPRINT.route(u'get_all_predictions/<int:id>', methods=[u'GET'])
+@WINNER_PREDICTION_API_BLUEPRINT.route(u'/get_all_predictions/<int:id>', methods=[u'GET'])
 def get_all_prediction(user_id):
     items = req.get_all_predictions(user_id)
     return flask_construct_response({u'items': items})
@@ -55,8 +49,6 @@ def get_all_prediction(user_id):
 """
 As her name indicates, this method allow to post by user the winner prediction of the worldcup 2k18
 """
-
-
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
     winner = json.loads(request.data).get(u'worldcup_winner', None)
@@ -70,9 +62,7 @@ def add_winner():
 
     win = json.loads(request.data)
     check = req.addWinner(win)
-    #print check
     #A revoir, renvoyer ce que l'user à send en bd
-    print check
     if check == 1:
         return flask_construct_response({u'response':'Insert successfull'})
     elif check == 0:

@@ -44,7 +44,6 @@ def infos_team(team_id):
         cursor, con = connect()
         cursor.execute("SELECT * FROM teams where id = " + str(team_id) + "")
         for row in cursor.fetchall():
-            # print(row)
             items.append({
                 u'id': row[0],
                 u'name': row[1],
@@ -65,7 +64,6 @@ def infos_stadium(stadium_id):
         cursor, con = connect()
         cursor.execute("SELECT * FROM stadiums where id = " + str(stadium_id) + "")
         for row in cursor.fetchall():
-            print(row)
             items.append({
                 u'id': row[0],
                 u'lat': row[1],
@@ -181,18 +179,12 @@ def get_stages_and_matches():
 def scoringMatch(match_id, result):
     items = []
     rslt =  result.get(u'score')
-    print "le result est: {}".format(rslt)
-    print type(rslt)
     pred = result.get(u'winner')
     if pred is None:
         pred = "NULL"
-    print "my pred: {}".format(pred)
     try:
-        print type(rslt)
         cursor, con = connect()
         query = u"UPDATE matches SET score='{}', winner={} WHERE id={}".format(str(result.get(u'score')), pred, match_id)
-
-        print query
 
         cursor.execute(query)
         con.commit()
@@ -205,13 +197,10 @@ def scoringMatch(match_id, result):
 
 def predictMatch(id, predict):
     matches_id = id
-    print u"id is: {}".format(unicode(id).encode(u'utf-8'))
     score = predict["score"]
     winner = predict["winner"]
-    print u"winner is: {}".format(winner)
     user = users.get_current_user()
     email = user.email()
-    print email
     users_id = get_user_id(email)
 
     try:
@@ -287,7 +276,6 @@ def scoringMatch(id, predict):
 
 
 def getFixture(id):
-    print "here"
     fixture = []
     try:
         cursor, con = connect()
@@ -295,8 +283,6 @@ def getFixture(id):
         for row in cursor.fetchall():
             team_1 = row[3]
             team_2 = row[4]
-            print team_1
-            print team_2
             fixture.append({
                 u'date': row[2],
                 u'team1': getTeam(str(team_1)),
@@ -319,11 +305,11 @@ def Ranking():
     cursor.execute(query)
     for row in cursor.fetchall():
         team = {
-            u"id": row[8],
-            u"name": row[9],
-            u"iso2": row[10],
-            u"flag_url": row[11],
-            u"eliminated": False if row[12] == 0 else True,
+            u"id": row[9],
+            u"name": row[10],
+            u"iso2": row[11],
+            u"flag_url": row[12],
+            u"eliminated": False if row[13] == 0 else True,
         }
         user = {
             u"id": row[0],
@@ -351,7 +337,6 @@ def getAllStadiums():
         cursor, con = connect()
         cursor.execute("SELECT * FROM stadiums")
         for row in cursor.fetchall():
-            print(row)
             items.append({
                 u'id': row[0],
                 u'lat': row[1],
@@ -396,7 +381,6 @@ def get_team(team_id):
         cursor, con = connect()
         cursor.execute("SELECT * FROM teams WHERE id=" + str(team_id))
         for row in cursor.fetchall():
-            print(row)
             items.append({
                 u'id': row[0],
                 u'name': row[1],
@@ -437,7 +421,6 @@ def get_user_connect():
     if user:
         email = user.email()
         entity = email.split(u"@")[1]
-        print u"Entity: " + entity
         cursor, con = connect()
         cursor.execute(u"SELECT email FROM users where email ='{}'".format(email))
         if len(cursor.fetchall()) < 1:
@@ -495,7 +478,6 @@ def getAllUsers():
         cursor, con = connect()
         cursor.execute("SELECT * FROM users")
         for row in cursor.fetchall():
-            # print(row)
             items.append({
                 u'id': row[0],
                 u'email': row[1],
@@ -534,16 +516,13 @@ def getMeAsUser():
                 u'fixture': getFixture(str(idM)),
                 u'winner': row[3]
             })
-        # print idM
 
         try:
             idM
         except NameError:
             var_exists = False
-            print var_exists
         else:
             var_exists = True
-        print var_exists
 
         table.append({u'predictions': sstable})
 
@@ -563,7 +542,6 @@ def insert_new_user(user):
     user_entity = user.email().split(u"@")[1]
     user_nickname = user.nickname()
     user_admin = users.is_current_user_admin()
-    print user_admin
     try:
         cursor, con = connect()
         query = u"INSERT INTO users (email, entity, name, is_admin) VALUES ('{}', '{}', '{}', {})".format(user_email,
@@ -584,7 +562,6 @@ def get_user_id(email):
         cursor.execute("SELECT id FROM users where email ='" + email + "'")
         for row in cursor.fetchall():
             id_user = row[0]
-            print id_user
         return id_user
     except BaseException, e:
         logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
@@ -593,7 +570,6 @@ def get_user_id(email):
 
 
 def addWinner(winner):
-    print winner
     if not winner:
         winner_id = u"NULL"
     else:
@@ -604,7 +580,6 @@ def addWinner(winner):
     cursor, con = connect()
 
     query = u"UPDATE users SET worldcup_winner = {} WHERE id = {}".format(winner_id, user.get(u"id"))
-    print query
     cursor.execute(query)
     con.commit()
     return winner_id
@@ -680,7 +655,6 @@ def insert_new_prediction(prediction):
     if pred is None:
         pred = "NULL"
 
-    print "my pred: {}".format(pred)
     cursor, con = connect()
     query = u"INSERT INTO predictions (matches_id, score, winner, users_id) VALUES ({}, '{}', {}, {})".format(
         prediction.get(u'matches_id'),
@@ -688,7 +662,6 @@ def insert_new_prediction(prediction):
         pred,
         prediction.get(u'users_id')
     )
-    print u"QUERY " + query
 
     cursor.execute(query)
     con.commit()
@@ -699,8 +672,6 @@ def insert_new_prediction(prediction):
 def predict(match_id, prediction):
     try:
         user = get_current_user()
-        print prediction
-        print prediction.get(u"winner")
         if prediction_allowed(match_id):
             new_prediction = {
                 u"id": None,
@@ -714,11 +685,9 @@ def predict(match_id, prediction):
             
             # if prediction already in db
             if db_prediction:
-                print "q"
                 new_prediction[u"id"] = db_prediction.get(u"id")
                 my_prediction = update_prediction(new_prediction)
             else:
-                print "z"
                 my_prediction = insert_new_prediction(new_prediction)
 
             return my_prediction
@@ -745,16 +714,13 @@ def prediction_allowed(match_id):
     else:
         now = time.time()
         match = get_match(match_id)
-        print u"MY MATCH "+unicode(match)
         if match:
             stage = match.get(u"stage")
             if now < stage.get(u"opening_time"):
-                print u"NOT OPENED YET"
                 return False
             else:
                 if stage.get(u"closing_time", False):
                     if now > stage.get(u"closing_time"):
-                        print u"ALREADY CLOSED"
                         return False
                     else:
                         return True
@@ -913,19 +879,26 @@ def get_worldcup_winner():
         result = {
             u"winner_id": winner[0],
             u"opening_time": datetime_to_float(winner[1]),
-            u"closing_time": datetime_to_float(winner[2])
+            u"closing_time": datetime_to_float(winner[2]),
+            u"flag_url": winner[3]
         }
         return result
 
 
 def post_winner_wc(winner):
+    print winner.get(u'flag_url')
     try:
-        print winner
         cursor, con = connect()
         cursor.execute("SELECT * FROM worldcup")
         if cursor.fetchone():
-            print "labas"
-            cursor.execute("UPDATE worldcup SET winner=" + str(winner['winner']))
+            print "here"
+            start = datetime.utcfromtimestamp(1561604614).strftime('%Y-%m-%d %H:%M:%S')
+            end = datetime.utcfromtimestamp(1583938973).strftime('%Y-%m-%d %H:%M:%S')
+            query = u"UPDATE worldcup SET flag_url={}, winner={}, opening_time='{}', closing_time='{}'".format("NULL", "NULL", start, end)
+            # query = u"UPDATE worldcup SET flag_url='{}', winner='{}'".format("NULL", "NULL")
+            # print query
+            cursor.execute(query)
+            # cursor.execute("UPDATE worldcup SET winner=" + str(winner['winner']))
             con.commit()
         else:
             print "here"
@@ -1008,37 +981,26 @@ def get_user_points(user_id):
 
 def update_score(match_id, predict):
     stages_id = check_stages(match_id)
-    print "nous somme à la phase: {}".format(stages_id)
     score_final = predict.get(u'score')
-    print "score final: {}".format(score_final)
     winner_final = predict.get(u'winner')
-    print "winner final: {}".format(winner_final)
     if stages_id < 9:
         cursor, con = connect()
         cursor.execute("SELECT * FROM predictions where matches_id ='" + str(match_id) + "'")
         for row in cursor.fetchall():
-            print row
             users_id = row[4]
             points = get_user_points(users_id)
-            print "score du user: {}".format(row[2])
             if row[2] == score_final:
                 points = points + 3 
-            print "winner du user: {}".format(row[3])
             if row[3] is None and winner_final == "NULL":
-                print "here null"
                 points = points + 1 
             elif row[3] == winner_final:
                 points = points + 1 
             else:
                 pass
-                 
-            print "points total attribués au user: {}".format(points)
         
             try: 
                 cursor, con = connect()
                 query = u"UPDATE users SET points={} WHERE id={}".format(points, users_id)
-
-                print query
 
                 cursor.execute(query)
                 con.commit()
@@ -1051,29 +1013,20 @@ def update_score(match_id, predict):
         cursor, con = connect()
         cursor.execute("SELECT * FROM predictions where matches_id ='" + str(match_id) + "'")
         for row in cursor.fetchall():
-            print row
             users_id = row[4]
             points = get_user_points(users_id)
-            print "score du user: {}".format(row[2])
             if row[2] == score_final:
                 points = points + 3 
-            print "winner du user: {}".format(row[3])
             if row[3] is None and winner_final == "NULL":
-                print "here null"
                 points = points + 1 
             elif row[3] == winner_final:
                 points = points + 1 
             else:
                 pass
-                 
-            print "points total attribués au user: {}".format(points)
         
             try: 
                 cursor, con = connect()
                 query = u"UPDATE users SET points={} WHERE id={}".format(points, users_id)
-
-                print query
-
                 cursor.execute(query)
                 con.commit()
                 
@@ -1089,35 +1042,23 @@ def update_score(match_id, predict):
 """
 def update_point_final(winner):
     win = winner['winner']
-    print win
     try: 
         cursor, con = connect()
         query = u"SELECT id, worldcup_winner, points, has_modified_worldcup_winner FROM users"
         cursor.execute(query)
         for row in cursor.fetchall():
-            print row
-            print "Mon winner est: {}".format(row[1])
-            print "modifier?: {}".format(row[3])
-            print "point avant upfate?: {}".format(row[2])
             if row[1] == win and row[3] == 0:
                 points = row[2] + 15
-                print "points du winner non update: {}".format(points)
                 cursor, con = connect()
                 query = u"UPDATE users SET points={} WHERE id={}".format(points, row[0])
-
-                print query
 
                 cursor.execute(query)
                 con.commit()
                 rslt = 1
             elif row[1] == win and row[3] == 1:
                 points = row[2] + 10
-                print "points du winner Update: {}".format(points)
                 cursor, con = connect()
                 query = u"UPDATE users SET points={} WHERE id={}".format(points, row[0])
-
-                print query
-
                 cursor.execute(query)
                 con.commit()
                 rslt = 1

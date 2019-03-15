@@ -1,13 +1,12 @@
-# DGC Worldcup
+# AFCON 2K19 Pronos
 
 ## General
-- gPXXX
-- CdP: No one !
-- dev: Andresse Njeungoue, Valentin Coudert, Vincent Tertre
-- Dossier Drive: https://drive.google.com/drive/folders/1-psHxL-PypzUXhjdlc7iAzrZ39G1tLzY
+- CdP: Andresse Njeungoue
+- dev: Andresse Njeungoue
+- Dossier Drive: 
 
 ## GCP
-- project: https://console.cloud.google.com/home/dashboard?project=dgc-worldcup-russia-2018
+- project: console_project_url
 - scope:
   - https://www.googleapis.com/auth/admin.directory.user.readonly
   - https://www.googleapis.com/auth/admin.directory.group.readonly

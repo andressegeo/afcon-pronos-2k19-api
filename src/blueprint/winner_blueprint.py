@@ -23,13 +23,14 @@ def get_winner():
 
 @WINNER_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def post_winner():
-    if not users.is_current_user_admin():
-        abort(403)
+    #print(users.is_current_user_admin())
+    # if not users.is_current_user_admin():
+    #     abort(403)
 
     winner = json.loads(request.data)
+    # print winner
     items = req.post_winner_wc(winner)
     check = req.update_point_final(winner)
-    print "check: {}".format(check)
 
     if check == 1:
         return flask_construct_response({u'response': 'Update points and score successfull'})

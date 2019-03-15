@@ -17,7 +17,7 @@ then
     fi
     logger -s -t [INFO] "create virtual env on ${CURRENT_PATH}/venv"
     # Install venv.
-    virtualenv -q -p python2 ${CURRENT_PATH}/venv || logger -s -t [ERROR] "Failed to create virtualenv."
+    virtualenv -q -p python2.7 ${CURRENT_PATH}/venv || logger -s -t [ERROR] "Failed to create virtualenv."
 
     # Pip install in venv.
     dev_file="${CURRENT_PATH}/requirements.txt"
