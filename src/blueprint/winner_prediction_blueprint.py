@@ -51,7 +51,10 @@ As her name indicates, this method allow to post by user the winner prediction o
 """
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
-    winner = json.loads(request.data).get(u'worldcup_winner', None)
+    print json.loads(request.data)
+    winner = json.loads(request.data)
+    winner = winner.get(u'winner', None).get(u'id')
+    print winner
     items = req.addWinner(winner)
     return flask_construct_response({u'worldcup_winner': items})
 
