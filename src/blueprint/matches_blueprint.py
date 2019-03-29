@@ -16,8 +16,15 @@ As her name indicates, this method allow to retrieve the games open to predictio
 @MATCHES_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_all_matches():
     items = req.getAllMatches()
+    # logging.warn("fEds: {}".format(items))
     return flask_construct_response({u'items': items})
 
+@MATCHES_API_BLUEPRINT.route(u'/random_predict', methods=[u'POST'])
+def random_predict():
+    # random predict all score of current user none predicted
+    # predict = request.data
+    # print predict
+    return flask_construct_response({"check":"test"})
 
 @MATCHES_API_BLUEPRINT.route(u'/<int:id>/predict', methods=[u'POST'])
 def predict_one_match(id):
