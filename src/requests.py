@@ -39,18 +39,20 @@ def infos_team(team_id):
     if not team_id:
         team_id = u"null"
 
-    items = []
+    items = {}
     try:
         cursor, con = connect()
-        cursor.execute("SELECT * FROM teams where id = " + str(team_id) + "")
-        for row in cursor.fetchall():
-            items.append({
+        query = "SELECT * FROM teams where id = " + str(team_id) + ""
+        cursor.execute(query)
+        row = cursor.fetchone()
+        if row:
+            items = {
                 u'id': row[0],
                 u'name': row[1],
                 u'iso2': row[2],
                 u'flag_url': row[3],
                 u'eliminated': False if row[4] == 0 else True
-            })
+            }
         con.commit()
 
     except BaseException, e:
@@ -59,18 +61,20 @@ def infos_team(team_id):
 
 
 def infos_stadium(stadium_id):
-    items = []
+    items = {}
     try:
         cursor, con = connect()
-        cursor.execute("SELECT * FROM stadiums where id = " + str(stadium_id) + "")
-        for row in cursor.fetchall():
-            items.append({
+        query = "SELECT * FROM stadiums where id = " + str(stadium_id) + ""
+        cursor.execute(query)
+        row = cursor.fetchone()
+        if row:
+            items = {
                 u'id': row[0],
                 u'lat': row[1],
                 u'lng': row[2],
                 u'name': row[3],
                 u'city': row[0],
-            })
+            }
         con.commit()
 
     except BaseException, e:
@@ -120,6 +124,7 @@ def getAllMatches():
                 u'opening_time': datetime_to_float(row[2]),
                 u'closing_time': datetime_to_float(row[3]),
                 u'matches': construct_matches(row[0]),
+                u'must_have_winner': row[4]
             })
         con.commit()
 
@@ -576,10 +581,12 @@ def addWinner(winner):
         winner_id = winner
 
     user = get_current_user()
-
+    print winner
+    print user
     cursor, con = connect()
 
     query = u"UPDATE users SET worldcup_winner = {} WHERE id = {}".format(winner_id, user.get(u"id"))
+    print query
     cursor.execute(query)
     con.commit()
     return winner_id
@@ -886,22 +893,20 @@ def get_worldcup_winner():
 
 
 def post_winner_wc(winner):
-    print winner.get(u'flag_url')
+    # print winner[u'winner'][u'flag_url']
     try:
         cursor, con = connect()
         cursor.execute("SELECT * FROM worldcup")
         if cursor.fetchone():
-            print "here"
-            start = datetime.utcfromtimestamp(1561604614).strftime('%Y-%m-%d %H:%M:%S')
+            start = datetime.utcfromtimestamp(1583938973).strftime('%Y-%m-%d %H:%M:%S')
             end = datetime.utcfromtimestamp(1583938973).strftime('%Y-%m-%d %H:%M:%S')
-            query = u"UPDATE worldcup SET flag_url={}, winner={}, opening_time='{}', closing_time='{}'".format("NULL", "NULL", start, end)
+            query = u"UPDATE worldcup SET flag_url={}, winner={}, opening_time='{}', closing_time='{}'".format('NULL','NULL', start, end)
             # query = u"UPDATE worldcup SET flag_url='{}', winner='{}'".format("NULL", "NULL")
-            # print query
+            print query
             cursor.execute(query)
             # cursor.execute("UPDATE worldcup SET winner=" + str(winner['winner']))
             con.commit()
         else:
-            print "here"
             req = "INSERT into worldcup(winner) VALUES (%s)"
             cursor.execute(req, [winner[u"winner"]])
             con.commit()
