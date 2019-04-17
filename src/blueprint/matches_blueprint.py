@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort
+from flask import Blueprint, request, abort, jsonify
 from google.appengine.api import users
 import json
 import logging
@@ -29,8 +29,21 @@ def random_predict():
 @MATCHES_API_BLUEPRINT.route(u'/<int:id>/predict', methods=[u'POST'])
 def predict_one_match(id):
     predict = json.loads(request.data)
+    print "prediction: {}".format(predict)
+    
+    a,b = predict['score'].split('-')
+    a = int(a)
+    b = int (b)
+    if (a < 0 or a>20):
+        a = 0
+    if (b < 0 or b>20):
+        b = 0
+    predict['score'] = u'{}-{}'.format(a,b)
+    print predict
+
     my_predict = req.predict(id, predict)
-    return flask_construct_response(my_predict)
+    print "FINPRED: {}".format(my_predict)
+    return flask_construct_response(my_predict) 
 
 """
 As her name indicates, this method allow to send the current user prediction for this game
@@ -72,7 +85,7 @@ def scoring_one_match(match_id):
 
 @MATCHES_API_BLUEPRINT.route(u'/<int:id>/enter_score', methods=[u'POST'])
 def scoring_one_match(id):
-
+    #when deploy, dont forget to remove this
     # if not users.is_current_user_admin():
     #     abort(403)
     predict = json.loads(request.data)
