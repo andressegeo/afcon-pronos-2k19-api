@@ -46,4 +46,5 @@ As her name indicates, this method allow to retrieve current connected user and 
 def get_me_as_user():
     user_with_predictions = req.get_me_and_my_predictions()
     # items = req.get_me()
+    # print "User as me: {}".format(user_with_predictions)
     return flask_construct_response(user_with_predictions)

@@ -54,9 +54,9 @@ def add_winner():
     print json.loads(request.data)
     winner = json.loads(request.data)
     winner = winner.get(u'winner', None).get(u'id')
-    print winner
-    items = req.addWinner(winner)
-    return flask_construct_response({u'worldcup_winner': items})
+    result = req.addWinner(winner)
+    print "Result: {}".format(result)
+    return flask_construct_response({u'worldcup_winner': result})
 
 
 """

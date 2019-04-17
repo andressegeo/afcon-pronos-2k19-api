@@ -23,7 +23,6 @@ def get_winner():
 
 @WINNER_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def post_winner():
-    #print(users.is_current_user_admin())
     # if not users.is_current_user_admin():
     #     abort(403)
 

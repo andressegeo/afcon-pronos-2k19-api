@@ -20,6 +20,7 @@ from config import CONFIG
 
 def connect():
     con = MySQLdb.connect(
+        # unix_socket = CONFIG[u"db"][u"unix_socket"],
         host=CONFIG[u"db"][u"host"],
         user=CONFIG[u"db"][u"user"],
         passwd=CONFIG[u"db"][u"password"],
@@ -308,6 +309,7 @@ def Ranking():
     cursor, con = connect()
     query = u"SELECT * from users u left outer join teams t on u.worldcup_winner=t.id order by u.points desc, u.email "
     cursor.execute(query)
+    i = 1
     for row in cursor.fetchall():
         team = {
             u"id": row[9],
@@ -327,7 +329,8 @@ def Ranking():
             u"is_admin": False if row[7] == 0 else True,
             u"predictions": []
         }
-        items.append(user)
+        items.append({"rank":i, "user":user})
+        i+=1
     return items
 
 
@@ -446,6 +449,7 @@ def is_user_in_db(user):
 
 
 def get_user(user):
+    logging.warn("After insert retrieve me")
     user_obj = {}
     cursor, con = connect()
     query = u"SELECT * FROM users where email ='{}'".format(user.email())
@@ -468,11 +472,14 @@ def get_user(user):
 
 
 def get_current_user():
+    logging.warn("HEEYYY")
     user = users.get_current_user()
     user = get_user(user)
     if user:
+        logging.warn("BRABRA")
         return user
     else:
+        logging.warn("BOBI")
         user = insert_new_user(user)
         return user
 
@@ -547,6 +554,12 @@ def insert_new_user(user):
     user_entity = user.email().split(u"@")[1]
     user_nickname = user.nickname()
     user_admin = users.is_current_user_admin()
+
+    logging.warn("user: {}".format(user))
+    logging.warn("user_email: {}".format(user_email))
+    logging.warn("user_entity: {}".format(user_entity))
+    logging.warn("user_nickname: {}".format(user_nickname))
+    logging.warn("user_admin: {}".format(user_admin))
     try:
         cursor, con = connect()
         query = u"INSERT INTO users (email, entity, name, is_admin) VALUES ('{}', '{}', '{}', {})".format(user_email,
@@ -581,15 +594,34 @@ def addWinner(winner):
         winner_id = winner
 
     user = get_current_user()
-    print winner
-    print user
+    # print winner
+    # print user
     cursor, con = connect()
 
     query = u"UPDATE users SET worldcup_winner = {} WHERE id = {}".format(winner_id, user.get(u"id"))
-    print query
+    # print query
     cursor.execute(query)
     con.commit()
-    return winner_id
+    
+    cursor, con = connect()
+    query = u"SELECT * FROM teams where id = {}".format(winner_id)
+    cursor.execute(query)
+
+    team = cursor.fetchone()
+
+    if team:
+        my_favorite_team = {
+            u"id": team[0],
+            u"name": team[1],
+            u"iso2": team[2],
+            u"flag_url": team[3],
+            u"eliminated": False if team[4] == 0 else True
+        }
+    else:
+        print "lkjhgqsdjqkj"
+
+    # print my_favorite_team
+    return my_favorite_team
 
 
 
@@ -978,7 +1010,7 @@ def get_user_points(user_id):
             points = result[0]
             return points
         else:
-            return 109
+            return 0
     except BaseException, e:
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return 209
@@ -994,14 +1026,18 @@ def update_score(match_id, predict):
         for row in cursor.fetchall():
             users_id = row[4]
             points = get_user_points(users_id)
-            if row[2] == score_final:
-                points = points + 3 
             if row[3] is None and winner_final == "NULL":
-                points = points + 1 
+                if row[2] == score_final:
+                    points = points + 5
+                else:
+                    points = points + 3
             elif row[3] == winner_final:
-                points = points + 1 
+                if row[2] == score_final:
+                    points = points + 5
+                else:
+                    points = points + 3
             else:
-                pass
+                points = points + 1
         
             try: 
                 cursor, con = connect()
@@ -1020,14 +1056,18 @@ def update_score(match_id, predict):
         for row in cursor.fetchall():
             users_id = row[4]
             points = get_user_points(users_id)
-            if row[2] == score_final:
-                points = points + 3 
             if row[3] is None and winner_final == "NULL":
-                points = points + 1 
+                if row[2] == score_final:
+                    points = points + 5
+                else:
+                    points = points + 3
             elif row[3] == winner_final:
-                points = points + 1 
+                if row[2] == score_final:
+                    points = points + 5
+                else:
+                    points = points + 3
             else:
-                pass
+                points = points + 1
         
             try: 
                 cursor, con = connect()
