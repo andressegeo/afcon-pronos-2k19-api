@@ -6,13 +6,14 @@ Blueprint utils methods
 import json
 from collections import OrderedDict
 from functools import wraps
+import logging
 
 from cerberus import Validator
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, render_template
 from google.appengine.api import users
 
 from src.requests import is_user_in_db, insert_new_user
-
+from src.blueprint.services import email_service
 
 def flask_constructor_error(message, status=500, custom_error_code=None, error_payload=None):
     """
@@ -133,10 +134,22 @@ def define_before_request_function(app):
     @app.before_request
     def before_request():
         user = users.get_current_user()
+        logging.warn("USERRR: {}".format(user))
         if user:
+            logging.warn("OPIO")
             if is_user_in_db(user):
                 return
             else:
+                logging.warn("UEGHJ")
                 if insert_new_user(user):
+                    # print "new user"
+                    # print user
+                    # recipients = user
+                    # subject = "Welcome on our platform "
+                    # body = render_template('welcome_mail.html', pers1 = user, pers2 = user)
+                    # try:
+                    #     email_service.send(recipients, subject, body)
+                    # except BaseException, e:
+                    #     logging.error(u'Failed to send error mail: {}'.format(unicode(e).encode(u'utf-8')))
                     return
         abort(403)
