@@ -3,15 +3,16 @@
 Configuration file.
 """
 import logging
-
+import os
+default_pass = u"localroot1234"
 
 CONFIG = {
     u"db": {
-        u"unix_socket": u"/cloudsql/",
+        u"unix_socket": u"/cloudsql/pronos-can-2019:europe-west3:pronos-can",
         u"user": u"root",
-        u"host" : u"",
-        u"password": u"",
-        u"database": u"",
+        u"host" : u"35.246.169.22",
+        u"password": u"localroot1234",
+        u"database": u"preprod_afcon_2019",
         u"charset": u"utf-8"
     },
     u"logging": {
@@ -20,7 +21,7 @@ CONFIG = {
         u"pattern_debug": u'[%(filename)15s::%(funcName)15s]-[l.%(lineno)3s] %(message)s'
     },
     u"app": {
-        u"env": u"dev",
-        u"debug": False
+        u"env": u"prod",
+        u"debug": True
     }
 }

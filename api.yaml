@@ -11,7 +11,7 @@ handlers:
 
 libraries:
 - name: MySQLdb
-  version: "latest"
+  version: latest
 - name: ssl
   version: latest
 
@@ -25,6 +25,7 @@ skip_files:
   - ^(.*/)?\..*$
   - ^node_modules$
   - ^venv$
+  - ^env2$
   - ^log\.txt$
   - ^\.idea$
   - ^\.git$
