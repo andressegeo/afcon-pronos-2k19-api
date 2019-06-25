@@ -2,6 +2,7 @@ from flask import Blueprint
 
 import src.requests as req
 from .blueprint_utils import flask_construct_response
+from google.appengine.api import users
 
 USERS_API_BLUEPRINT = Blueprint(u'users_api', __name__)
 

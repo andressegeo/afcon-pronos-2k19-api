@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import abort
 from google.appengine.api import users
 
-from config import CONFIG
+from config import CONFIG, get_all_matches
 
 
 # ################################
@@ -602,7 +602,7 @@ def addWinner(winner):
     # print query
     cursor.execute(query)
     con.commit()
-    
+
     cursor, con = connect()
     query = u"SELECT * FROM teams where id = {}".format(winner_id)
     cursor.execute(query)
@@ -704,10 +704,61 @@ def insert_new_prediction(prediction):
 
     cursor.execute(query)
     con.commit()
-    
+
     return get_prediction(prediction)
 
+def match_non_predicted(user_id):
+    # print user_id
+    cursor, con = connect()
+    cursor.execute("SELECT matches_id FROM predictions where users_id ='" + str(user_id) + "'")
+    resp = cursor.fetchall()
+    # print "resHey: {}".format(resp)
+    tab = []
+    matches_predicted = {row[0] for row in resp}
+    # print matches_predicted
+    # matches_predicted = set(tab)
+    # for row in resp:
+    #     print row[0]
+    #     tab.append(row)
+    # print tab[0]
+    list_all_matches_id = {1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20,21,22,23,24,25,26,27,28,33,34,35,36,37,38,39,40,41,42,43,44}
+    # print "matches_predicted: {}".format(matches_predicted)
+    matches_non_predict = list(list_all_matches_id ^ matches_predicted)
+    if matches_non_predict:
+        # print "matches_non_predict: {}".format(matches_non_predict)
+        get_matches = get_all_matches()
+        liste = [(str(x), get_matches.get(str(x))[2:], str(user_id)) for x in matches_non_predict]
+        # print "Liste: {}".format(liste)
+        listezero = liste[0]
+        values = "({},'{}',{},{})".format(int(listezero[0]), listezero[1][0][0], listezero[1][0][1], int(listezero[2]))
+        # print "values: {}".format(values)
+        for each in liste[1:]:
+            values +=",({},'{}',{},{})".format(int(each[0]), each[1][0][0], each[1][0][1], int(each[2]))
 
+        query = u"INSERT INTO predictions (matches_id, score, winner, users_id) VALUES {}".format(
+            values
+        )
+        # print "QUERY: {}".format(query)
+        cursor.execute(query)
+        con.commit()
+    return 1
+
+def retrieve_predicted_matches():
+    user = users.get_current_user()
+    if user:
+        email = user.email()
+        cursor, con = connect()
+        cursor.execute(u"SELECT id FROM users where email ='{}'".format(email))
+        user_db = cursor.fetchone()
+        matches_non_predicted = match_non_predicted(user_db[0])
+        return user_db[0]
+
+# User random predict
+def random_user_predict():
+    resp = retrieve_predicted_matches()
+    print resp
+
+# User predict score
 def predict(match_id, prediction):
     try:
         user = get_current_user()
@@ -721,7 +772,7 @@ def predict(match_id, prediction):
             }
 
             db_prediction = get_prediction(new_prediction)
-            
+
             # if prediction already in db
             if db_prediction:
                 new_prediction[u"id"] = db_prediction.get(u"id")
@@ -983,7 +1034,7 @@ def addWinner(win):
         return 2
 """
 def check_stages(match_id):
-    
+
     try:
         cursor, con = connect()
         query = u"SELECT stages_id FROM matches where id ='{}'".format(match_id)
@@ -1000,8 +1051,8 @@ def check_stages(match_id):
 
 
 def get_user_points(user_id):
-    
-    try: 
+
+    try:
         cursor, con = connect()
         query = u"SELECT points FROM users where id ='{}'".format(user_id)
         cursor.execute(query)
@@ -1014,9 +1065,9 @@ def get_user_points(user_id):
     except BaseException, e:
         logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return 209
-        
 
-def update_score(match_id, predict):
+# Help to set user's points up to date
+def update_points(match_id, predict):
     stages_id = check_stages(match_id)
     score_final = predict.get(u'score')
     winner_final = predict.get(u'winner')
@@ -1038,14 +1089,14 @@ def update_score(match_id, predict):
                     points = points + 3
             else:
                 points = points + 1
-        
-            try: 
+
+            try:
                 cursor, con = connect()
                 query = u"UPDATE users SET points={} WHERE id={}".format(points, users_id)
 
                 cursor.execute(query)
                 con.commit()
-                
+
             except BaseException, e:
                 logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return 1
@@ -1068,18 +1119,18 @@ def update_score(match_id, predict):
                     points = points + 3
             else:
                 points = points + 1
-        
-            try: 
+
+            try:
                 cursor, con = connect()
                 query = u"UPDATE users SET points={} WHERE id={}".format(points, users_id)
                 cursor.execute(query)
                 con.commit()
-                
+
             except BaseException, e:
                 logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
         return 1
- 
-    
+
+
     else:
         return 2
 """
@@ -1087,7 +1138,7 @@ def update_score(match_id, predict):
 """
 def update_point_final(winner):
     win = winner['winner']
-    try: 
+    try:
         cursor, con = connect()
         query = u"SELECT id, worldcup_winner, points, has_modified_worldcup_winner FROM users"
         cursor.execute(query)

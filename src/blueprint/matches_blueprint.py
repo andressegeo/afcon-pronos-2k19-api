@@ -24,12 +24,14 @@ def random_predict():
     # random predict all score of current user none predicted
     # predict = request.data
     # print predict
-    return flask_construct_response({"check":"test"})
+    logging.info('yeah')
+    response = req.random_user_predict()
+    return flask_construct_response({"resp":"yes"})
 
 @MATCHES_API_BLUEPRINT.route(u'/<int:id>/predict', methods=[u'POST'])
 def predict_one_match(id):
     predict = json.loads(request.data)
-    print "prediction: {}".format(predict)
+    # print "prediction: {}".format(predict)
     
     a,b = predict['score'].split('-')
     a = int(a)
@@ -39,10 +41,10 @@ def predict_one_match(id):
     if (b < 0 or b>20):
         b = 0
     predict['score'] = u'{}-{}'.format(a,b)
-    print predict
+    # print predict
 
     my_predict = req.predict(id, predict)
-    print "FINPRED: {}".format(my_predict)
+    # print "FINPRED: {}".format(my_predict)
     return flask_construct_response(my_predict) 
 
 """
@@ -89,10 +91,10 @@ def scoring_one_match(id):
     # if not users.is_current_user_admin():
     #     abort(403)
     predict = json.loads(request.data)
-    print predict
+    # print predict
     try:
                 
-        result = req.update_score(id, predict)
+        result = req.update_points(id, predict)
         check = req.scoringMatch(id, predict)
 #A revoir
         if result == 1 and check == 1:

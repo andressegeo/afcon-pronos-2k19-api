@@ -5,7 +5,7 @@ from datetime import datetime
 
 def send(recipients, subject, body):
     isHTML=True
-    print("recep: "+recipients)
+    # print("recep: "+recipients)
     logging.debug(u'Sending mail {} to {}'.format(subject, unicode(recipients)).encode(u'utf-8'))
 
     message = mail.EmailMessage(
