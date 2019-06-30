@@ -23,7 +23,7 @@ CONFIG = {
     },
     u"app": {
         u"env": u"prod",
-        u"debug": True
+        u"debug": False
     }
 }
 

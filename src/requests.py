@@ -235,7 +235,7 @@ def get_match(match_id):
         return {
             u"id": my_match[0],
             u"stages_id": my_match[1],
-            u"match_time": my_match[2],
+            u"match_time": datetime_to_float(my_match[2]),
             u"team_1": my_match[3],
             u"team_2": my_match[4],
             u"placeholder_1": my_match[5],
@@ -256,29 +256,6 @@ def is_match_played_today(match_id):
         return True
     else:
         return False
-
-"""
-def scoringMatch(id, predict):
-    matches_id = id
-    print u"id is: {}".format(unicode(id).encode(u'utf-8'))
-    score = predict["score"]
-    winner = predict["winner"]
-    print u"winner is: {}".format(winner)
-    user = users.get_current_user()
-    email = user.email()
-    print email
-    users_id = get_user_id(email)
-
-    try:
-        cursor, con = connect()
-        req = "INSERT INTO predictions(matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)"
-        cursor.execute(req, [matches_id, score, winner, users_id])
-        con.commit()
-        return 1
-    except BaseException, e:
-        logging.error(u'Failed {}'.format(unicode(e).encode(u'utf-8')))
-        return 0
-"""
 
 
 def getFixture(id):
@@ -472,14 +449,14 @@ def get_user(user):
 
 
 def get_current_user():
-    logging.warn("HEEYYY")
+    # logging.warn("HEEYYY")
     user = users.get_current_user()
     user = get_user(user)
     if user:
-        logging.warn("BRABRA")
+        # logging.warn("BRABRA")
         return user
     else:
-        logging.warn("BOBI")
+        # logging.warn("BOBI")
         user = insert_new_user(user)
         return user
 
@@ -679,7 +656,7 @@ def update_prediction(prediction):
     pred = prediction.get(u'winner')
     if pred is None:
         pred = "NULL"
-    print "my pred: {}".format(pred)
+    print "my pred: {}".format(prediction)
     cursor, con = connect()
     query = u"UPDATE predictions SET score='{}', winner={} WHERE id={}".format(prediction.get(u'score'),
                                                                             pred,
@@ -760,6 +737,7 @@ def random_user_predict():
 
 # User predict score
 def predict(match_id, prediction):
+    print ("predict here")
     try:
         user = get_current_user()
         if prediction_allowed(match_id):
@@ -782,7 +760,7 @@ def predict(match_id, prediction):
 
             return my_prediction
         else:
-            abort(403)
+            abort(403, {'message': 'petit plaisantin, tu veux tricher? Mdr'})
     except BaseException, e:
         logging.error(u'Failed: {}'.format(unicode(e).encode(u'utf-8')))
 
@@ -800,59 +778,33 @@ def datetime_to_float(d):
 
 def prediction_allowed(match_id):
     if CONFIG[u"app"].get(u"debug"):
+        print "we doesn't check"
         return True
     else:
+        print "we check rights to predict here"
         now = time.time()
+        print ("current_date: now: {}".format(now))
         match = get_match(match_id)
+        print ("matchGet: {}".format(match))
         if match:
+            print ("match Rigths Time: {}".format(match.get(u"match_time") - 3600))
+            match_time_allow_bet = match.get(u"match_time") - 3600
             stage = match.get(u"stage")
             if now < stage.get(u"opening_time"):
                 return False
             else:
                 if stage.get(u"closing_time", False):
-                    if now > stage.get(u"closing_time"):
+                    if now > match_time_allow_bet:
                         return False
                     else:
                         return True
-                else:
-                    if is_match_played_today(match_id):
-                        return False
-                    else:
-                        return True
+                # else:
+                #     if is_match_played_today(match_id):
+                #         return False
+                #     else:
+                #         return True
         else:
             return False
-
-
-
-"""
-def predictMatch(prediction):
-    items = []
-    try:
-        print prediction
-        cursor, con = connect()
-        cursor.execute(
-            "SELECT * FROM predictions where matches_id=" + str(prediction.get(u'matches_id')) + " AND users_id=" + str(
-                prediction.get(u'users_id')))
-        result = cursor.fetchall()
-        if prediction.get(u'winner') is not None:
-            prediction[u'winner'] = str(prediction[u'winner'])
-        if len(result) > 0:
-            cursor.execute("UPDATE predictions SET score=%s, winner=%s WHERE id=%s",
-                           (prediction.get(u'score'),
-                            prediction.get(u'winner'),
-                            result[0][0]
-                            ))
-        else:
-            cursor.execute("INSERT INTO predictions (matches_id, score, winner, users_id) VALUES (%s, %s, %s, %s)",
-                           (str(prediction.get(u'matches_id')),
-                            prediction.get(u'score'),
-                            prediction.get(u'winner'),
-                            str(prediction.get(u'users_id'))))
-        con.commit()
-    except BaseException, e:
-        logging.error(u'Failed to get row: {}'.format(unicode(e).encode(u'utf-8')))
-    return items
-"""
 
 
 def get_user_and_predictions(user_email):
