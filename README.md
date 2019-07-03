@@ -29,7 +29,7 @@ cf specs dans le dossier Drive.
 
 ```bash
 source venv/bin/activate
-dev_appserver.py ../dgc-worldcup/app.yaml api.yaml ../dgc-worldcup/dispatch.yaml
+dev_appserver.py api.yaml ../afcon-egyptia-2019/app.yaml ../afcon-egyptia-2019/dispatch.yaml
 # ... then
 deactivate
 ```
