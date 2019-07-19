@@ -919,7 +919,7 @@ def get_worldcup_winner():
 
         winner = cursor.fetchone()
         result = {
-            u"winner_id": winner[0],
+            u"id": winner[0],
             u"opening_time": datetime_to_float(winner[1]),
             u"closing_time": datetime_to_float(winner[2]),
             u"flag_url": winner[3]
@@ -935,12 +935,15 @@ def post_winner_wc(winner):
         if cursor.fetchone():
             start = datetime.utcfromtimestamp(1583938973).strftime('%Y-%m-%d %H:%M:%S')
             end = datetime.utcfromtimestamp(1583938973).strftime('%Y-%m-%d %H:%M:%S')
-            query = u"UPDATE worldcup SET flag_url={}, winner={}, opening_time='{}', closing_time='{}'".format('NULL','NULL', start, end)
+            query = u"UPDATE worldcup SET flag_url='{}', winner={}, opening_time='{}', closing_time='{}'".format(winner[u'winner'][u'flag_url'], winner[u'winner'][u'id'], start, end)
             # query = u"UPDATE worldcup SET flag_url='{}', winner='{}'".format("NULL", "NULL")
             print query
-            cursor.execute(query)
-            # cursor.execute("UPDATE worldcup SET winner=" + str(winner['winner']))
-            con.commit()
+            try:
+                cursor.execute(query)
+                # cursor.execute("UPDATE worldcup SET winner=" + str(winner['winner']))
+                con.commit()
+            except Exception as err:
+                print ("ERODDS: {}".format(err))
         else:
             req = "INSERT into worldcup(winner) VALUES (%s)"
             cursor.execute(req, [winner[u"winner"]])
@@ -1089,12 +1092,14 @@ def update_points(match_id, predict):
     Update users points when admin enter final winner of the worldcup at the end of tournament.
 """
 def update_point_final(winner):
-    win = winner['winner']
+    win = winner['winner']['id']
+    print ("win: {}".format(win))
     try:
         cursor, con = connect()
         query = u"SELECT id, worldcup_winner, points, has_modified_worldcup_winner FROM users"
         cursor.execute(query)
         for row in cursor.fetchall():
+            print ("row: {}".format(row))
             if row[1] == win and row[3] == 0:
                 points = row[2] + 15
                 cursor, con = connect()

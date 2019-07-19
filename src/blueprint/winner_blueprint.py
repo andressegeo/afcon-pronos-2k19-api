@@ -27,7 +27,7 @@ def post_winner():
     #     abort(403)
 
     winner = json.loads(request.data)
-    # print winner
+    print winner
     items = req.post_winner_wc(winner)
     check = req.update_point_final(winner)
 
