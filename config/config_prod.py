@@ -9,9 +9,9 @@ default_pass = u"localroot1234"
 
 CONFIG = {
     u"db": {
-        u"unix_socket": u"/cloudsql/can-2k19:europe-west1:can",
+        u"unix_socket": u"/cloudsql/can-2k19:europe-west1:afcon-migration",
         u"user": u"root",
-        u"host" : u"35.195.109.87",
+        u"host" : u"35.240.75.128",
         u"password": u"Namesgeo2k19",
         u"database": u"worldcup_2018",
         u"charset": u"utf-8"
