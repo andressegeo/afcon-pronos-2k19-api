@@ -15,6 +15,9 @@ libraries:
 - name: ssl
   version: latest
 
+env_variables:
+  AFCON_PWD_PROD: "Namesgeo2k19"
+
 skip_files:
   - ^(.*/)?#.*#$
   - ^(.*/)?.*~$

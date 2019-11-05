@@ -19,15 +19,18 @@ from config import CONFIG, get_all_matches
 
 
 def connect():
-    con = MySQLdb.connect(
-        # unix_socket = CONFIG[u"db"][u"unix_socket"],
-        host=CONFIG[u"db"][u"host"],
-        user=CONFIG[u"db"][u"user"],
-        passwd=CONFIG[u"db"][u"password"],
-        db=CONFIG[u"db"][u"database"],
-        charset=u"utf8",
-        use_unicode=True)
-    cursor = con.cursor()
+    try:
+        con = MySQLdb.connect(
+            unix_socket = CONFIG[u"db"][u"unix_socket"],
+            host=CONFIG[u"db"][u"host"],
+            user=CONFIG[u"db"][u"user"],
+            passwd=CONFIG[u"db"][u"password"],
+            db=CONFIG[u"db"][u"database"],
+            charset=u"utf8",
+            use_unicode=True)
+        cursor = con.cursor()
+    except Exception as err:
+        print(err)
     return cursor, con
 
 
@@ -284,7 +287,7 @@ def getFixture(id):
 def Ranking():
     items = []
     cursor, con = connect()
-    query = u"SELECT * from users u left outer join teams t on u.worldcup_winner=t.id order by u.points desc, u.email "
+    query = u"SELECT * from users u left outer join teams t on u.afcon_winner=t.id order by u.points desc, u.email "
     cursor.execute(query)
     i = 1
     for row in cursor.fetchall():
@@ -301,7 +304,7 @@ def Ranking():
             u"name": row[2],
             u"entity": row[3],
             u"picture_url": row[4],
-            u"worldcup_winner": team,
+            u"afcon_winner": team,
             u"points": row[6],
             u"is_admin": False if row[7] == 0 else True,
             u"predictions": []
@@ -439,9 +442,9 @@ def get_user(user):
         user_obj[u"name"] = user_db[2]
         user_obj[u"entity"] = user_db[3]
         user_obj[u"picture_url"] = user_db[4]
-        user_obj[u"worldcup_winner"] = user_db[5]
+        user_obj[u"afcon_winner"] = user_db[5]
         user_obj[u"points"] = user_db[6]
-        user_obj[u"has_modified_worldcup_winner"] = False if user_db[7] == 0 else True
+        user_obj[u"has_modified_afcon_winner"] = False if user_db[7] == 0 else True
         user_obj[u"is_admin"] = False if user_db[8] == 0 else True
 
     user_obj = retrieve_my_winner(user_obj)
@@ -462,6 +465,7 @@ def get_current_user():
 
 
 def getAllUsers():
+    print("gtsgssdgas")
     items = []
     try:
         cursor, con = connect()
@@ -473,7 +477,7 @@ def getAllUsers():
                 u'name': row[2],
                 u'entity': row[3],
                 u'picture_url': row[4],
-                u'worldcup_winner': row[5],
+                u'afcon_winner': row[5],
                 u'points': row[6]
             })
         con.commit()
@@ -575,7 +579,7 @@ def addWinner(winner):
     # print user
     cursor, con = connect()
 
-    query = u"UPDATE users SET worldcup_winner = {} WHERE id = {}".format(winner_id, user.get(u"id"))
+    query = u"UPDATE users SET afcon_winner = {} WHERE id = {}".format(winner_id, user.get(u"id"))
     # print query
     cursor.execute(query)
     con.commit()
@@ -603,9 +607,9 @@ def addWinner(winner):
 
 
 def retrieve_my_winner(user):
-    if user.get(u"worldcup_winner"):
+    if user.get(u"afcon_winner"):
         cursor, con = connect()
-        query = u"SELECT * FROM teams where id = {}".format(user.get(u"worldcup_winner"))
+        query = u"SELECT * FROM teams where id = {}".format(user.get(u"afcon_winner"))
         cursor.execute(query)
 
         team = cursor.fetchone()
@@ -620,7 +624,7 @@ def retrieve_my_winner(user):
             }
         else:
             my_favorite_team = None
-        user[u"worldcup_winner"] = my_favorite_team
+        user[u"afcon_winner"] = my_favorite_team
 
     return user
 
@@ -826,7 +830,7 @@ def get_user_and_predictions(user_email):
                     u'name': row[2],
                     u'entity': row[3],
                     u'picture_url': row[4],
-                    u'worldcup_winner': row[5],
+                    u'afcon_winner': row[5],
                     u'points': row[6],
                     u'is_admin': row[7],
                 })
@@ -874,7 +878,7 @@ def getPredictionWinner():
     tab = []
     try:
         cursor, con = connect()
-        cursor.execute(u"SELECT worldcup_winner FROM users where email ='{}'".format(user))
+        cursor.execute(u"SELECT afcon_winner FROM users where email ='{}'".format(user))
         for row in cursor.fetchall():
             #winner = getTeam(str(row[0]))
             tab.append({
@@ -908,13 +912,13 @@ def retrieve_my_predictions(user):
 
 
 # ################################
-# Part - WorldCup
+# Part - Afcon
 # ################################
 
 
-def get_worldcup_winner():
+def get_afcon_winner():
         cursor, con = connect()
-        query = u"SELECT * FROM worldcup"
+        query = u"SELECT * FROM afcon"
         cursor.execute(query)
 
         winner = cursor.fetchone()
@@ -931,21 +935,21 @@ def post_winner_wc(winner):
     # print winner[u'winner'][u'flag_url']
     try:
         cursor, con = connect()
-        cursor.execute("SELECT * FROM worldcup")
+        cursor.execute("SELECT * FROM afcon")
         if cursor.fetchone():
             start = datetime.utcfromtimestamp(1583938973).strftime('%Y-%m-%d %H:%M:%S')
             end = datetime.utcfromtimestamp(1583938973).strftime('%Y-%m-%d %H:%M:%S')
-            query = u"UPDATE worldcup SET flag_url='{}', winner={}, opening_time='{}', closing_time='{}'".format(winner[u'winner'][u'flag_url'], winner[u'winner'][u'id'], start, end)
-            # query = u"UPDATE worldcup SET flag_url='{}', winner='{}'".format("NULL", "NULL")
+            query = u"UPDATE afcon SET flag_url='{}', winner={}, opening_time='{}', closing_time='{}'".format(winner[u'winner'][u'flag_url'], winner[u'winner'][u'id'], start, end)
+            # query = u"UPDATE afcon SET flag_url='{}', winner='{}'".format("NULL", "NULL")
             print query
             try:
                 cursor.execute(query)
-                # cursor.execute("UPDATE worldcup SET winner=" + str(winner['winner']))
+                # cursor.execute("UPDATE afcon SET winner=" + str(winner['winner']))
                 con.commit()
             except Exception as err:
                 print ("ERODDS: {}".format(err))
         else:
-            req = "INSERT into worldcup(winner) VALUES (%s)"
+            req = "INSERT into afcon(winner) VALUES (%s)"
             cursor.execute(req, [winner[u"winner"]])
             con.commit()
     except TypeError as e:
@@ -953,7 +957,7 @@ def post_winner_wc(winner):
 
 """
 def addWinner(win):
-    win = win["worldcup_winner"]
+    win = win["afcon_winner"]
     user = users.get_current_user()
     email = user.email()
     print email
@@ -966,7 +970,7 @@ def addWinner(win):
         print "Vous avez modifiez avant la date de cloture de phase de poules"
         try:
             cursor, con = connect()
-            cursor.execute("UPDATE users SET worldcup_winner =" + str(win) + " where email = '" + str(email) + "'")
+            cursor.execute("UPDATE users SET afcon_winner =" + str(win) + " where email = '" + str(email) + "'")
             con.commit()
             return 1
         except BaseException, e:
@@ -977,8 +981,8 @@ def addWinner(win):
         print "Vous avez modifié durant la phase d'entre 2 tours, vous aurez des points en moins "
         try:
             cursor, con = connect()
-            cursor.execute("UPDATE users SET worldcup_winner =" + str(
-                win) + ", has_modified_worldcup_winner = 1 where email = '" + str(email) + "'")
+            cursor.execute("UPDATE users SET afcon_winner =" + str(
+                win) + ", has_modified_afcon_winner = 1 where email = '" + str(email) + "'")
             con.commit()
             return 1
         except BaseException, e:
@@ -1089,14 +1093,14 @@ def update_points(match_id, predict):
     else:
         return 2
 """
-    Update users points when admin enter final winner of the worldcup at the end of tournament.
+    Update users points when admin enter final winner of the afcon at the end of tournament.
 """
 def update_point_final(winner):
     win = winner['winner']['id']
     print ("win: {}".format(win))
     try:
         cursor, con = connect()
-        query = u"SELECT id, worldcup_winner, points, has_modified_worldcup_winner FROM users"
+        query = u"SELECT id, afcon_winner, points, has_modified_afcon_winner FROM users"
         cursor.execute(query)
         for row in cursor.fetchall():
             print ("row: {}".format(row))

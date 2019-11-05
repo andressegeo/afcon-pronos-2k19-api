@@ -134,13 +134,13 @@ def define_before_request_function(app):
     @app.before_request
     def before_request():
         user = users.get_current_user()
-        logging.warn("USERRR: {}".format(user))
+        logging.warn("CURRENT USER: {}".format(user))
         if user:
-            logging.warn("OPIO")
+            # logging.warn("OPIO")
             if is_user_in_db(user):
                 return
             else:
-                logging.warn("UEGHJ")
+                # logging.warn("UEGHJ")
                 if insert_new_user(user):
                     # print "new user"
                     # print user

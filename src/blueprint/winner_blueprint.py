@@ -16,7 +16,7 @@ As her name indicates, this method allow to get the winner prediction according 
 
 @WINNER_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_winner():
-    items = req.get_worldcup_winner()
+    items = req.get_afcon_winner()
     return flask_construct_response({u'winner': items})
 
 

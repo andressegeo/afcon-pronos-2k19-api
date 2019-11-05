@@ -4,12 +4,16 @@ Configuration file.
 """
 import logging
 import random
+import os
+default_pass = u"localroot1234"
+AFCON_PWD_DEV = os.environ.get('AFCON_PWD_DEV') or default_pass
+print("AFCON_PWD_DEV: {}".format(AFCON_PWD_DEV))
 CONFIG = {
     u"db": {
         u"user": u"root",
         u"host" : u"127.0.0.1",
-        u"password": u"localroot1234",
-        u"database": u"worldcup_2018",
+        u"password": AFCON_PWD_DEV,
+        u"database": u"afcon_2019",
         u"charset": u"utf-8"
     },
     u"logging": {

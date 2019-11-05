@@ -47,7 +47,7 @@ def get_all_prediction(user_id):
 
 
 """
-As her name indicates, this method allow to post by user the winner prediction of the worldcup 2k18
+As her name indicates, this method allow to post by user the winner prediction of the afcon 2k19
 """
 @WINNER_PREDICTION_API_BLUEPRINT.route(u'/', methods=[u'POST'])
 def add_winner():
@@ -56,7 +56,7 @@ def add_winner():
     winner = winner.get(u'winner', None).get(u'id')
     result = req.addWinner(winner)
     # print "Result: {}".format(result)
-    return flask_construct_response({u'worldcup_winner': result})
+    return flask_construct_response({u'afcon_winner': result})
 
 
 """

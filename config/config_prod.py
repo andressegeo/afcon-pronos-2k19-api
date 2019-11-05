@@ -1,19 +1,20 @@
 # coding: utf-8
 """
-Configuration file.
+Configuration file
+Check well the password and the env to connect on cloud sql
 """
 import logging
 import random
 import os
-default_pass = u"localroot1234"
-
+AFCON_PWD_PROD = os.getenv('AFCON_PWD_PROD')
+print("AFCON_PWD_PROD: {}".format(AFCON_PWD_PROD))
 CONFIG = {
     u"db": {
-        u"unix_socket": u"/cloudsql/can-2k19:europe-west1:afcon-migration",
+        u"unix_socket": u"/cloudsql/can-2k19:europe-west1:afcon-2k19",
         u"user": u"root",
-        u"host" : u"35.240.75.128",
-        u"password": u"Namesgeo2k19",
-        u"database": u"worldcup_2018",
+        u"host" : u"34.76.82.226",
+        u"password": AFCON_PWD_PROD,
+        u"database": u"afcon_2019",
         u"charset": u"utf-8"
     },
     u"logging": {
