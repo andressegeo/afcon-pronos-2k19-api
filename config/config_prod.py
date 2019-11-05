@@ -7,7 +7,6 @@ import logging
 import random
 import os
 AFCON_PWD_PROD = os.getenv('AFCON_PWD_PROD')
-print("AFCON_PWD_PROD: {}".format(AFCON_PWD_PROD))
 CONFIG = {
     u"db": {
         u"unix_socket": u"/cloudsql/can-2k19:europe-west1:afcon-2k19",

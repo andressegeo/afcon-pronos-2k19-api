@@ -21,7 +21,7 @@ from config import CONFIG, get_all_matches
 def connect():
     try:
         con = MySQLdb.connect(
-            unix_socket = CONFIG[u"db"][u"unix_socket"],
+            # unix_socket = CONFIG[u"db"][u"unix_socket"],
             host=CONFIG[u"db"][u"host"],
             user=CONFIG[u"db"][u"user"],
             passwd=CONFIG[u"db"][u"password"],

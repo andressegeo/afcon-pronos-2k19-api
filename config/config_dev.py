@@ -7,7 +7,6 @@ import random
 import os
 default_pass = u"localroot1234"
 AFCON_PWD_DEV = os.environ.get('AFCON_PWD_DEV') or default_pass
-print("AFCON_PWD_DEV: {}".format(AFCON_PWD_DEV))
 CONFIG = {
     u"db": {
         u"user": u"root",

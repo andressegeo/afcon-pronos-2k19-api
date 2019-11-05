@@ -34,7 +34,6 @@ As her name indicates, this method allow to get all users in database
 
 @USERS_API_BLUEPRINT.route(u'/', methods=[u'GET'])
 def get_all_users():
-    print("hello")
     items = req.getAllUsers()
     return flask_construct_response({u'items': items})
 

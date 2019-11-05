@@ -14,12 +14,9 @@ init_logger(logging_config[u'pattern'], logging_config[u'pattern_debug'], loggin
 
 
 # create flask server
-# print(CONFIG[u"db"])
 APP = Flask(__name__)
 APP.debug = CONFIG[u"app"][u"debug"]
-print("aaa")
 APP.register_blueprint(USERS_API_BLUEPRINT, url_prefix=u'/api/users')
-print("bbb")
 APP.register_blueprint(TEAMS_API_BLUEPRINT, url_prefix=u'/api/teams')
 APP.register_blueprint(MATCHES_API_BLUEPRINT, url_prefix=u'/api/matches')
 APP.register_blueprint(WINNER_PREDICTION_API_BLUEPRINT, url_prefix=u'/api/winner_prediction')
@@ -29,9 +26,7 @@ APP.register_blueprint(WINNER_API_BLUEPRINT, url_prefix=u'/api/winner')
 
 
 # check that the user is properly logged in
-print("ddd")
 define_before_request_function(APP)
-print("ddd")
 
 
 @APP.errorhandler(404)
